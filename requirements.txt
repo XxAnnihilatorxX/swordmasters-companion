@@ -1,0 +1,5 @@
+Flask>=3.0
+requests>=2.31
+websocket-client>=1.7
+msgpack>=1.0
+gunicorn>=21.2
