@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SwordMasters Companion Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0d0f17;--card:#151927;--line:#242a40;--gold:#ffc83d;--blue:#38b6ff;--text:#e6e9f5;--mute:#8890ab;--bad:#ff5d73}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(900px 400px at 80% -10%,#16304a55,transparent),var(--bg);color:var(--text);font:15px/1.5 Inter,sans-serif;min-height:100vh}
+main{max-width:1000px;margin:0 auto;padding:28px 18px 60px}
+h1,h2,h3{font-family:Orbitron,sans-serif;margin:0}
+h1{font-size:clamp(22px,4vw,34px);font-weight:900;letter-spacing:.04em;color:var(--gold);text-shadow:0 0 18px #ffc83d55}
+h1 span{color:var(--blue);text-shadow:0 0 18px #38b6ff55}
+h3{font-size:14px;color:var(--blue);margin-bottom:12px;letter-spacing:.06em}
+nav{display:flex;gap:8px;margin:22px 0 18px;border-bottom:1px solid var(--line)}
+nav button{background:none;border:0;color:var(--mute);font:600 14px Orbitron,sans-serif;padding:10px 16px;cursor:pointer;border-bottom:2px solid transparent}
+nav button[aria-selected=true]{color:var(--gold);border-color:var(--gold)}
+button:focus-visible,input:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.search{display:flex;gap:10px}
+input[type=text]{flex:1;background:#0a0c13;border:1px solid var(--line);border-radius:8px;color:var(--text);font:500 16px Inter;padding:14px 16px}
+input[type=text]:focus{border-color:var(--blue);box-shadow:0 0 0 3px #38b6ff22}
+.go{background:var(--gold);color:#1a1300;border:0;border-radius:8px;font:700 14px Orbitron;padding:0 26px;cursor:pointer;box-shadow:0 0 20px #ffc83d44}
+.go:disabled{opacity:.5;cursor:wait}
+.banner{margin-top:14px;padding:12px 16px;border-radius:8px;border:1px solid var(--bad);background:#ff5d7318;color:#ffb3be}
+.loading{margin-top:18px;color:var(--blue);display:flex;gap:10px;align-items:center}
+.spin{width:16px;height:16px;border:2px solid var(--line);border-top-color:var(--blue);border-radius:50%;animation:s .8s linear infinite}
+@keyframes s{to{transform:rotate(360deg)}}
+.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));margin-top:18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px}
+.card.gold h3{color:var(--gold)}
+.kv{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px dashed var(--line)}
+.kv:last-child{border:0}.kv b{font-weight:600;color:var(--text);text-align:right}.kv span{color:var(--mute)}
+.empty{color:var(--mute)}
+table{width:100%;border-collapse:collapse}td,th{padding:8px 6px;text-align:left;border-bottom:1px solid var(--line)}th{color:var(--mute);font-weight:500}
+.note{font-size:12.5px;color:var(--mute);margin-top:10px}
+.tag{font-size:11px;border:1px solid var(--gold);color:var(--gold);border-radius:99px;padding:1px 8px;margin-left:6px;font-family:Inter}
+label.tg{display:flex;gap:10px;align-items:flex-start;padding:8px 0;cursor:pointer}
+label.tg small{display:block;color:var(--mute)}
+details{margin-top:18px}summary{cursor:pointer;color:var(--mute)}
+pre{background:#0a0c13;border:1px solid var(--line);border-radius:8px;padding:14px;overflow:auto;max-height:360px;font-size:12.5px}
+.hidden{display:none}
+.check{display:flex;gap:8px;align-items:center;padding:5px 0}
+@media(max-width:520px){.search{flex-direction:column}.go{padding:14px}}
+@media(prefers-reduced-motion:reduce){.spin{animation-duration:2s}}
+</style>
+</head>
+<body>
+<main>
+<h1>SWORDMASTERS <span>COMPANION HUB</span></h1>
+<nav role="tablist">
+  <button role="tab" aria-selected="true" data-tab="search">Player lookup</button>
+  <button role="tab" aria-selected="false" data-tab="tools">Optimizer &amp; Hub Tools</button>
+</nav>
+
+<section id="search">
+  <div class="search">
+    <input id="u" type="text" placeholder="Enter a Sword Masters username" maxlength="32" autocomplete="off" aria-label="Username">
+    <button class="go" id="go">LOOKUP</button>
+  </div>
+  <div id="msg" aria-live="polite"></div>
+  <div id="out"></div>
+</section>
+
+<section id="tools" class="hidden">
+  <div class="grid">
+    <div class="card gold">
+      <h3>Stat growth reference <span class="tag">edit &amp; verify in-game</span></h3>
+      <div id="ref"></div>
+      <p class="note">These numbers live in the <code>REFERENCE</code> object in this file. They are unverified starting values: confirm them in-game, then edit.</p>
+    </div>
+    <div class="card">
+      <h3>Enchantment priority</h3>
+      <table id="ench"></table>
+    </div>
+    <div class="card">
+      <h3>Hub Idea Enhancer</h3>
+      <div id="flags"></div>
+      <p class="note">Toggles are saved in this browser only.</p>
+    </div>
+    <div class="card hidden" id="guild">
+      <h3>Guild checklist</h3>
+      <div id="tasks"></div>
+      <div class="search" style="margin-top:10px"><input id="newtask" type="text" placeholder="Add a task" maxlength="60" aria-label="New task"><button class="go" id="addtask" style="padding:0 16px">ADD</button></div>
+    </div>
+    <div class="card hidden" id="soon">
+      <h3>Coming soon</h3>
+      <div id="soonlist" class="empty"></div>
+    </div>
+  </div>
+</section>
+</main>
+
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+
+/* ---------- tabs ---------- */
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('nav button').forEach(x=>x.setAttribute('aria-selected',x===b));
+  ['search','tools'].forEach(t=>$(t).classList.toggle('hidden',t!==b.dataset.tab));
+});
+
+/* ---------- lookup ---------- */
+const pick=(o,keys)=>{if(!o||typeof o!=='object')return undefined;for(const k of keys)if(o[k]!==undefined&&o[k]!==null)return o[k];};
+const fmt=v=>v===undefined||v===null?'—':typeof v==='number'?v.toLocaleString():typeof v==='object'?JSON.stringify(v):String(v);
+const rows=list=>list.map(([k,v])=>`<div class="kv"><span>${esc(k)}</span><b>${esc(fmt(v))}</b></div>`).join('');
+const item=o=>{if(o===undefined||o===null)return {id:undefined,lvl:undefined};if(typeof o!=='object')return {id:o,lvl:undefined};return {id:pick(o,['id','itemId','item','type']),lvl:pick(o,['level','lvl','lv'])};};
+const count=v=>Array.isArray(v)?v.length:v&&typeof v==='object'?Object.keys(v).length:v;
+
+function render(inv){
+  const sword=item(pick(inv,['activeSword','equippedSword','sword'])),shield=item(pick(inv,['activeShield','equippedShield','shield']));
+  const hp=pick(inv,['health','hp']),mhp=pick(inv,['maxHealth','maxHp']);
+  const kills=pick(inv,['killedEnemyTypes','killedEnemies'])||{};
+  const kr=Object.entries(kills).sort((a,b)=>(+b[1]||0)-(+a[1]||0));
+  $('out').innerHTML=`<div class="grid">
+   <div class="card gold"><h3>Core statistics</h3>${rows([
+     ['Level',pick(inv,['level','lvl'])],['Total power',pick(inv,['totalPower','power'])],['Gold',pick(inv,['gold','coins'])],
+     ['Health',hp!==undefined||mhp!==undefined?`${fmt(hp)} / ${fmt(mhp)}`:undefined],
+     ['Gold multiplier',pick(inv,['goldMultiplier','goldMulti'])],['Power multiplier',pick(inv,['powerMultiplier','powerMulti'])]])}</div>
+   <div class="card"><h3>Active loadout</h3>${rows([
+     ['Sword (item ID)',sword.id],['Sword level',sword.lvl],['Shield (item ID)',shield.id],['Shield level',shield.lvl],
+     ['Active pets',count(pick(inv,['activePets','equippedPets','pets']))],['Active books',count(pick(inv,['activeBooks','equippedBooks','books']))]])}</div>
+   <div class="card"><h3>Combat record</h3>${kr.length?rows(kr):'<p class="empty">No kill data in this response.</p>'}</div>
+  </div>
+  <details><summary>Raw response (use this to check real field names)</summary><pre>${esc(JSON.stringify(inv,null,2))}</pre></details>`;
+}
+
+async function lookup(){
+  const name=$('u').value.trim();
+  $('out').innerHTML='';$('msg').innerHTML='';
+  if(!name){$('msg').innerHTML='<div class="banner">Enter a username first.</div>';return;}
+  $('go').disabled=true;$('msg').innerHTML='<div class="loading"><div class="spin"></div>Contacting game servers…</div>';
+  try{
+    const r=await fetch('/api/lookup?username='+encodeURIComponent(name));
+    const j=await r.json().catch(()=>({}));
+    if(!r.ok||!j.success)throw new Error(j.error||'Lookup failed ('+r.status+').');
+    $('msg').innerHTML='';render(j.data);
+  }catch(e){$('msg').innerHTML=`<div class="banner">${esc(e.message)}</div>`;}
+  finally{$('go').disabled=false;}
+}
+$('go').onclick=lookup;$('u').addEventListener('keydown',e=>{if(e.key==='Enter')lookup();});
+
+/* ---------- tools (edit these values after verifying in-game) ---------- */
+const REFERENCE={
+  stats:[['Weapon damage scaling','+25% per level'],['Active pet cap','3'],['Source','Unverified: confirm in-game']],
+  enchants:[['S','Looting, Flame','Best for farming speed and damage'],['A','Thorns','Situational: defensive'],['B','Other enchants','Fill remaining slots']]
+};
+$('ref').innerHTML=rows(REFERENCE.stats);
+$('ench').innerHTML='<tr><th>Tier</th><th>Enchants</th><th>Why</th></tr>'+REFERENCE.enchants.map(r=>`<tr>${r.map(c=>`<td>${esc(c)}</td>`).join('')}</tr>`).join('');
+
+const FLAGS=[['guild','Guild tracking checklist','A simple task list for your guild'],['compare','Item comparison calculator','Compare two items side by side'],['market','Market trade value estimator','Estimate what a trade is worth']];
+const flags=store.get('flags',{});
+function paintFlags(){
+  $('flags').innerHTML=FLAGS.map(([k,t,d])=>`<label class="tg"><input type="checkbox" data-k="${k}" ${flags[k]?'checked':''}><span>${t}<small>${d}${k==='guild'?'':' (coming soon)'}</small></span></label>`).join('');
+  $('guild').classList.toggle('hidden',!flags.guild);
+  const soon=FLAGS.filter(f=>f[0]!=='guild'&&flags[f[0]]);
+  $('soon').classList.toggle('hidden',!soon.length);
+  $('soonlist').innerHTML=soon.map(f=>`<div class="check">• ${f[1]}</div>`).join('');
+  document.querySelectorAll('#flags input').forEach(i=>i.onchange=()=>{flags[i.dataset.k]=i.checked;store.set('flags',flags);paintFlags();});
+}
+paintFlags();
+
+let tasks=store.get('tasks',[]);
+function paintTasks(){
+  $('tasks').innerHTML=tasks.length?tasks.map((t,i)=>`<div class="check"><input type="checkbox" data-i="${i}" ${t.done?'checked':''} aria-label="Done"><span style="flex:1;${t.done?'text-decoration:line-through;color:var(--mute)':''}">${esc(t.text)}</span><button data-d="${i}" style="background:none;border:0;color:var(--mute);cursor:pointer" aria-label="Remove task">✕</button></div>`).join(''):'<p class="empty">No tasks yet. Add one below.</p>';
+  $('tasks').querySelectorAll('[data-i]').forEach(c=>c.onchange=()=>{tasks[c.dataset.i].done=c.checked;store.set('tasks',tasks);paintTasks();});
+  $('tasks').querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{tasks.splice(b.dataset.d,1);store.set('tasks',tasks);paintTasks();});
+}
+function addTask(){const v=$('newtask').value.trim();if(!v)return;tasks.push({text:v,done:false});$('newtask').value='';store.set('tasks',tasks);paintTasks();}
+$('addtask').onclick=addTask;$('newtask').addEventListener('keydown',e=>{if(e.key==='Enter')addTask();});
+paintTasks();
+</script>
+</body>
+</html>
