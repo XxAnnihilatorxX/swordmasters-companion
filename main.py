@@ -21,6 +21,23 @@ class LookupError_(Exception):
         self.status, self.msg = status, msg
 
 
+def find_key(obj, pred):
+    if isinstance(obj, dict):
+        for k, v in obj.items():
+            if pred(k) and isinstance(v, str) and v:
+                return v
+        for v in obj.values():
+            found = find_key(v, pred)
+            if found:
+                return found
+    elif isinstance(obj, list):
+        for v in obj:
+            found = find_key(v, pred)
+            if found:
+                return found
+    return None
+
+
 def lookup_player(username):
     deadline = time.monotonic() + TOTAL_TIMEOUT
 
@@ -36,10 +53,11 @@ def lookup_player(username):
                           json={}, timeout=left())
         r.raise_for_status()
         j = r.json()
-        token = j.get("token") or j.get("accessToken")
-        region = str(j.get("foundServer", ""))
+        token = find_key(j, lambda k: "token" in k.lower())
+        region = (find_key(j, lambda k: k.lower() in ("foundserver", "server", "region")) or "").lower()
         if not token or not REGION_RE.match(region):
-            raise LookupError_(502, "Unexpected response from game load balancer.")
+            keys = list(j.keys()) if isinstance(j, dict) else type(j).__name__
+            raise LookupError_(502, f"Unexpected load balancer reply (HTTP {r.status_code}, fields: {keys}).")
 
         # 2. seat reservation
         r = requests.post(f"https://{region}.swordmasters.io/matchmake/joinOrCreate/world_1",
