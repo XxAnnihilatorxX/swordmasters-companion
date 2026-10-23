@@ -64,6 +64,29 @@ h4{margin:16px 0 8px;font:600 11px Orbitron;color:var(--mute);letter-spacing:.15
 .it .x{position:absolute;right:6px;bottom:6px;font:700 11px Orbitron;color:var(--rc);border:1px solid var(--rc);border-radius:4px;padding:0 6px}
 .it .eqt{position:absolute;left:8px;bottom:6px;font:700 9px Orbitron;color:var(--gold)}
 .win{color:var(--gold);font-weight:700;text-shadow:0 0 10px #ffc83d55}#cout td,#cout th{text-align:center}
+input[type=number]{flex:1;min-width:0;background:#0a0c13;border:1px solid var(--line);border-radius:8px;color:var(--text);font:500 15px Inter;padding:12px 14px}
+.hero{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.tile{position:relative;overflow:hidden;background:linear-gradient(180deg,color-mix(in srgb,var(--c) 14%,var(--card)),var(--card))}
+.tile b{font-size:clamp(20px,3vw,26px)}
+.bar{height:5px;border-radius:3px;background:#0a0c13;margin-top:10px;overflow:hidden}.bar i{display:block;height:100%;background:var(--c);box-shadow:0 0 8px var(--c)}
+.mini{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));margin-top:10px}
+.mini div{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px}.mini small{display:block;color:var(--mute);font-size:10.5px;letter-spacing:.14em}.mini b{font:700 16px Orbitron}
+.it{width:176px;min-height:150px;margin-top:10px;padding:12px 10px 10px}
+.it .st{font-size:11.5px;color:var(--mute);margin-bottom:8px}
+.it .eqt{top:-9px;bottom:auto;left:10px;background:var(--bg);padding:0 6px;border-radius:4px}
+.it .x{top:-9px;bottom:auto;right:10px;background:var(--bg)}
+.sls{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:6px}
+.sl{border:1px dashed var(--line);border-radius:6px;padding:4px 2px;text-align:center;opacity:.4}
+.sl.on{opacity:1;border:1px solid var(--e);background:color-mix(in srgb,var(--e) 12%,transparent)}
+.sl span{display:block;font-size:9px;color:var(--mute)}.sl.on span{color:var(--e)}.sl b{font:700 12px Orbitron}
+.mp{width:100%;margin-top:6px;background:#0a0c13;color:var(--text);border:1px solid var(--line);border-radius:6px;font-size:11px;padding:4px}
+.sh{font-size:clamp(20px,3vw,28px);text-align:center;margin:8px 0 4px;color:var(--text)}.ssub{text-align:center;color:var(--mute);margin:0 0 6px}
+.sg{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+.sc{background:linear-gradient(180deg,color-mix(in srgb,var(--c) 12%,var(--card)),var(--card));border:1px solid var(--line);border-top:3px solid var(--c);border-radius:12px;padding:18px 12px;text-align:center}
+.sc.big{max-width:260px;margin:0 auto;padding:26px 14px}
+.av{width:58px;height:58px;border-radius:50%;margin:0 auto 12px;display:grid;place-items:center;font:800 22px Orbitron;color:var(--c);border:2px solid var(--c);box-shadow:0 0 18px var(--c);background:#0a0c13}
+.sc.big .av{width:74px;height:74px;font-size:28px}
+.sc b{display:block;font:700 15px Orbitron}.sc small{display:block;color:var(--c);letter-spacing:.16em;font-size:10px;margin-top:6px}
 .hidden{display:none}
 .check{display:flex;gap:8px;align-items:center;padding:5px 0}
 @media(max-width:520px){.search{flex-direction:column}.go{padding:14px}}
@@ -77,7 +100,9 @@ h4{margin:16px 0 8px;font:600 11px Orbitron;color:var(--mute);letter-spacing:.15
   <button role="tab" aria-selected="true" data-tab="search">Player lookup</button>
   <button role="tab" aria-selected="false" data-tab="compare">Compare players</button>
   <button role="tab" aria-selected="false" data-tab="drops">Drop finder</button>
+  <button role="tab" aria-selected="false" data-tab="lab">Upgrade Lab</button>
   <button role="tab" aria-selected="false" data-tab="tools">Optimizer &amp; Hub Tools</button>
+  <button role="tab" aria-selected="false" data-tab="staff">Staff Team</button>
 </nav>
 
 <section id="search">
@@ -97,12 +122,26 @@ h4{margin:16px 0 8px;font:600 11px Orbitron;color:var(--mute);letter-spacing:.15
   <div class="search"><select id="dm" aria-label="Mode"><option value="enemy">By enemy</option><option value="item">By item</option></select><input id="dq" type="text" placeholder="Search" aria-label="Search drops"></div>
   <div id="dout" class="grid"></div>
 </section>
+<section id="lab" class="hidden">
+  <div class="grid">
+   <div class="card gold" style="grid-column:1/-1"><h3>Enchant odds</h3>
+    <div class="search"><input id="lvl" type="number" min="0" value="10000" aria-label="Player level" placeholder="Player level"><input id="ft" type="number" min="0" max="20" value="0" aria-label="Fortune level" placeholder="Fortune level"></div>
+    <div class="tbl" id="eo"></div></div>
+   <div class="card"><h3>Pet enhancer</h3>
+    <div class="search"><select id="pp" aria-label="Pet"><option value="1">XPeppy</option><option value="2">XAxolotl</option><option value="3">XPengoo</option><option value="4">XLeo</option><option value="5">XPhoenix</option><option value="6">XOctoo</option><option value="7">XXen</option><option value="19">XRunix</option></select><input id="pl" type="number" min="0" value="10000" aria-label="Player level"></div>
+    <div id="po"></div></div>
+   <div class="card"><h3>Merge calculator</h3>
+    <input id="mg" type="number" min="2" max="12" value="5" aria-label="Target level" style="width:100%">
+    <div id="mo"></div></div>
+  </div>
+</section>
+<section id="staff" class="hidden"></section>
 <section id="tools" class="hidden">
   <div class="grid">
     <div class="card gold">
-      <h3>Quick reference <span class="tag">edit &amp; verify</span></h3>
+      <h3>Quick reference</h3>
       <div id="ref"></div>
-      <p class="note">These numbers live in the <code>REFERENCE</code> object in this file. They are unverified starting values: confirm them in-game, then edit.</p>
+      
     </div>
     <div class="card">
       <h3>Enchantment priority <span class="tag">unverified tiers</span></h3>
@@ -115,9 +154,9 @@ h4{margin:16px 0 8px;font:600 11px Orbitron;color:var(--mute);letter-spacing:.15
     </div>
     <div class="card hidden" id="compare" style="grid-column:1/-1"><h3>Item comparison</h3>
       <div class="search"><select id="cc" aria-label="Category"></select><select id="ca" aria-label="First item"></select><select id="cb" aria-label="Second item"></select></div>
-      <div id="cres" style="margin-top:12px"></div><p class="note">Base stats from the wiki. Upgrade levels and enchantments are not included.</p></div>
+      <div id="cres" style="margin-top:12px"></div></div>
     <div class="card" style="grid-column:1/-1">
-      <h3>Item database <span class="tag">from wiki</span></h3>
+      <h3>Item database</h3>
       <div class="search"><select id="dbk" aria-label="Category"><option value="swords">Swords</option><option value="shields">Shields</option><option value="pets">Pets</option></select>
       <input id="dbq" type="text" placeholder="Filter by name" aria-label="Filter"></div>
       <div class="tbl" id="dbt"></div>
@@ -141,7 +180,7 @@ const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'
 const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
 
 /* ---------- tabs ---------- */
-const TABS=['search','compare','drops','tools'],nav=document.querySelector('nav');
+const TABS=['search','compare','drops','lab','tools','staff'],nav=document.querySelector('nav');
 nav.insertAdjacentHTML('beforeend','<span class="ind"></span>');
 function moveInd(){const b=nav.querySelector('[aria-selected=true]'),i=nav.querySelector('.ind');i.style.left=b.offsetLeft+'px';i.style.width=b.offsetWidth+'px';}
 nav.querySelectorAll('button').forEach(b=>b.onclick=()=>{nav.querySelectorAll('button').forEach(x=>x.setAttribute('aria-selected',x===b));TABS.forEach(t=>$(t).classList.toggle('hidden',t!==b.dataset.tab));moveInd();});
@@ -274,7 +313,7 @@ Inferno|E|10.25|10.25|1
 Ponyo|C|4.25|4.75|0
 Chandy|R|4.5|5|0
 Runix|E|12.5|13.5|1.2`,PET_K);
-const ENEMY_NAMES='Roundhead,Forest Orc,Bonechewer,Cocoa Guardian,Chocolate Knight,Mallowbeast,Ice King,Spiked Tortoise,Cursed Stone,Mummy,Giant Moai,Lava Rock,Nether Lord,Zeus,Crokora,Hydrino,Temple Guardian,Bouugo,Anaxion,Xenomor,Dragon Guardian,Dragon,Reaper,Thrones,Seraphim,The Rival,Wargmaw,Lornblade,Mordolith'.split(',');
+const ENEMY_NAMES='Roundhead,Forest Orc,Bonechewer,Cocoa Guardian,Chocolate Knight,Mallowbeast,Ice King,Spiked Tortoise,Cursed Stone,Mummy,Giga Moai,Lava Rock,Nether Lord,Zeus,Crokora,Hydrino,Temple Guardian,Bouugo,Anaxion,Xenomor,Dragon Guardian,Dragon,Reaper,Thrones,Seraphim,The Rival,Wargmaw,Lornblade,Mordolith'.split(',');
 const ENCHANT_NAMES={0:'Flame',1:'Thorns',2:'Looting',3:'Freeze',4:'Fortune'}; // 0 and 1 confirmed from screenshot; 2-4 assumed from list order
 
 const SUF=['','K','M','B','T','QT','QNT','SXT','SPT','OCT','NON','DEC'];
@@ -288,41 +327,74 @@ const ench=a=>Array.isArray(a)&&a.length?a.map(e=>`${ENCHANT_NAMES[e.type]||'Enc
 const sline=(o,keys)=>keys.filter(k=>o[k]).map(k=>LBL[k]+' '+(BIG.includes(k)?abbr(o[k]):'x'+o[k])).join(' · ')||'—';
 const gear=(g,L,K)=>{if(!g||typeof g!=='object')return ['—','—','—','—'];const it=L[g.type];return [`${it?it.n:'Type '+g.type} · Lv ${g.level}`,ench(g.enchantments),g.itemId,it?sline(it,K):'—'];};
 
-/* Confirmed in-game IDs only (from reference screenshots). Unknown IDs show as "Item #ID". Add more as they are verified. */
 const IDMAP={swords:{44:"Soulkeeper's Blade"},shields:{5:'Shield of the Kingdom',42:'Sealguard'},pets:{21:'XPeppy',22:'XAxolotl',23:'XPengoo',24:'XLeo'}};
-const byId=(k,t)=>{const n=IDMAP[k][t];return n?{swords:SWORDS,shields:SHIELDS,pets:PETS}[k].find(x=>x.n===n):undefined;};
-const RC={Common:'#8890ab',Rare:'#38b6ff',Epic:'#b36bff',Legendary:'#ffc83d'};
-const tile=(l,v,tip,c)=>`<div class="tile" style="--c:${c}"><small>${l}</small><b title="${esc(tip||'')}">${esc(v)}</b></div>`;
-function stacks(list,activeIds,lvl){const m=new Map();(list||[]).forEach(o=>{const k=o.type+'|'+(lvl?o.level+ench(o.enchantments):'');const g=m.get(k)||{o,n:0,eq:false};g.n++;if(activeIds.includes(o.itemId))g.eq=true;m.set(k,g);});return [...m.values()].sort((a,b)=>b.eq-a.eq||b.o.type-a.o.type);}
-function cards(groups,kind,lvl){return groups.length?`<div class="inv">${groups.map(({o,n,eq})=>{const it=byId(kind,o.type),rc=it?RC[it.r]:'#4a5170';
-  return `<div class="it${eq?' eq':''}" style="--rc:${rc}"><div class="top">${lvl?`<span class="lv">LV ${o.level}</span>`:'<span></span>'}<span>${it?it.r.toUpperCase():'UNKNOWN'}</span></div><div class="nm">${esc(it?it.n:'Item #'+o.type)}</div>${lvl&&o.enchantments&&o.enchantments.length?`<div class="en">${esc(ench(o.enchantments))}</div>`:''}${eq?'<span class="eqt">EQUIPPED</span>':''}${n>1?`<span class="x">x${n}</span>`:''}</div>`;}).join('')}</div>`:'<p class="empty">None</p>';}
+const MAP=location.hash==='#mapper',saved=store.get('idmap',{});
+['swords','shields','pets'].forEach(k=>Object.assign(IDMAP[k],saved[k]||{}));
+const CATS={swords:SWORDS,shields:SHIELDS,pets:PETS};
+PETS.push(...mk(`XPeppy|L|13|12|.5
+XAxolotl|L|15|13|.6
+XPengoo|L|16.5|16|.75
+XLeo|L|18|17.5|1.5
+XPhoenix|L|19.5|19|.8
+XOctoo|L|22|21|.9
+XXen|L|24|23|1
+XInferno|L|25|25|1
+XRunix|L|27.5|27.5|1.35`,PET_K));
+/* catalog corrections from the game's own item list */
+const fixI=(L,n,o)=>{const x=L.find(i=>i.n.toLowerCase()===n.toLowerCase());if(x)Object.assign(x,o);};
+fixI(SWORDS,'Last Horizon',{gold:22});fixI(SWORDS,'Draco Devil',{n:"Dragon's Devil"});fixI(SWORDS,'Graveborn Edge',{n:'Graveborn Edge'});
+fixI(SWORDS,"Dragon's Teeth",{dmg:9e7});fixI(SWORDS,'Blade of Sorrow',{prot:5e5});fixI(SWORDS,'Duneslicer',{prot:15000});fixI(SWORDS,'Sandstrike',{prot:10000});
+fixI(SHIELDS,'Asgardian Aegis',{dm:14});fixI(SHIELDS,"Dragon's Soul",{dm:9,hp:17,gold:17,prot:1e9});fixI(SHIELDS,'Barbed Sunward',{prot:35000});
+const byId=(k,t)=>{const n=IDMAP[k][t];return n?CATS[k].find(x=>x.n===n):undefined;};
+const RC={Common:'#8890ab',Rare:'#38b6ff',Epic:'#b36bff',Legendary:'#ffc83d'},RK={Common:1,Rare:2,Epic:3,Legendary:4};
+const ENS={swords:[[0,'Flame','#ff7a3d'],[2,'Looting','#ffc83d'],[3,'Freeze','#38d6ff']],shields:[[1,'Thorns','#3dffa0'],[2,'Looting','#ffc83d'],[4,'Fortune','#b36bff']]};
+const ROM=['','I','II','III','IV','V'];
+const sc=g=>1+.25*(((g&&g.level)||1)-1);
+const slots=(o,k)=>ENS[k].map(([t,n,c])=>{const e=(o.enchantments||[]).find(x=>x.type===t);return `<div class="sl${e?' on':''}" style="--e:${c}"><span>${n}</span><b>${e?(ROM[e.level]||e.level):'—'}</b></div>`;}).join('');
+const tile=(l,v,tip,c,x='')=>`<div class="tile" style="--c:${c}"><small>${l}</small><b title="${esc(tip||'')}">${esc(v)}</b>${x}</div>`;
 
+function calc(inv){
+  const P=+inv.power||0,lvl=+inv.level||0,aS=inv.activeSword,aH=inv.activeShield;
+  const sI=aS&&byId('swords',aS.type),hI=aH&&byId('shields',aH.type),hits=1+.5*Math.pow(lvl,1/8);
+  if(!sI||(aH&&!hI))return {hits};
+  const DS=sI.dmg*sc(aS),MS=hI?hI.dm*sc(aH):0,r=Math.sqrt(P),dmg=(DS+2*r+1)*(1+MS);
+  const fl=(aS.enchantments||[]).find(e=>e.type===0),flame=fl?(2*r+DS)/(10-fl.level)*(1+MS):0;
+  return {hits,dmg,flame,dps:dmg*hits+flame};
+}
+function stacks(list,act,kind){
+  const ids=[].concat(act||[]),gear=kind!=='pets',m=new Map();
+  (list||[]).forEach(o=>{const k=o.type+'|'+(gear?o.level+'|'+JSON.stringify(o.enchantments||[]):'');const g=m.get(k)||{o,n:0,eq:false};g.n++;if(ids.includes(o.itemId))g.eq=true;m.set(k,g);});
+  const key=g=>{const it=byId(kind,g.o.type);return [g.eq?1:0,it?RK[it.r]:0,g.o.level||0,it?CATS[kind].indexOf(it):-1,g.o.type];};
+  return [...m.values()].sort((a,b)=>{const x=key(a),y=key(b);for(let i=0;i<x.length;i++)if(x[i]!==y[i])return y[i]-x[i];return 0;});
+}
+function cards(groups,kind){
+  const gear=kind!=='pets';
+  if(!groups.length)return '<p class="empty">None</p>';
+  return `<div class="inv">${groups.map(({o,n,eq})=>{const it=byId(kind,o.type),rc=it?RC[it.r]:'#4a5170';
+    const st=!it?'':kind==='swords'?'Damage '+abbr(it.dmg*sc(o)):kind==='shields'?(it.dm?'Dmg multi x'+(+(it.dm*sc(o)).toFixed(2)):'Protection '+abbr(it.prot*sc(o))):'Gold x'+it.gold+' · Power x'+it.pow;
+    return `<div class="it${eq?' eq':''}" style="--rc:${rc}"><div class="top"><span>${it?it.r.toUpperCase():'UNKNOWN'}</span>${gear?`<span class="lv">LV ${o.level}</span>`:''}</div><div class="nm">${esc(it?it.n:'Item #'+o.type)}</div><div class="st">${esc(st)}</div>${gear?`<div class="sls">${slots(o,kind)}</div>`:''}${MAP&&!it?`<select class="mp" data-k="${kind}" data-t="${o.type}"><option value="">Name this item</option>${CATS[kind].map(x=>`<option>${esc(x.n)}</option>`).join('')}</select>`:''}${eq?'<span class="eqt">EQUIPPED</span>':''}${n>1?`<span class="x">x${n}</span>`:''}</div>`;}).join('')}</div>`;
+}
+let LAST=null;
 function render(inv,name){
-  const aS=inv.activeSword,aH=inv.activeShield,sI=aS&&byId('swords',aS.type),hI=aH&&byId('shields',aH.type);
-  const pets=Array.isArray(inv.activePets)?inv.activePets:[],pI=pets.map(p=>byId('pets',p.type));
-  const books=(Array.isArray(inv.activeBooks)?inv.activeBooks:[]).filter(b=>b>0);
-  const gr=(g,it,K)=>g?[`${it?it.n+' ('+it.r+')':'Item #'+g.type} · Lv ${g.level}`,ench(g.enchantments),it?sline(it,K):'—']:['—','—','—'];
-  const sw=gr(aS,sI,SW_K),sh=gr(aH,hI,SH_K);
-  const sum=k=>+pI.reduce((t,p)=>t+p[k],0).toFixed(2);
-  const bonus=pets.length&&pI.every(Boolean)?`Gold x${sum('gold')} · Power x${sum('pow')}`:undefined;
+  LAST=[inv,name];
+  const c=calc(inv),L=+inv.level||0,xp=+inv.experience||0;
+  const prog=Math.max(0,Math.min(1,(xp-Math.pow(L,4))/(Math.pow(L+1,4)-Math.pow(L,4))));
   const kills=Object.entries(inv.killedEnemyTypes||{}).map(([k,v])=>[k,+v||0]).sort((a,b)=>+a[0]-+b[0]);
   const total=kills.reduce((t,[,v])=>t+v,0),max=Math.max(1,...kills.map(k=>k[1]));
-  const act=(a)=>(a?[a.itemId]:[]);
+  const mini=[['GOLD MULTI',inv.goldMultiplier!==undefined?'x'+inv.goldMultiplier:'—'],['POWER MULTI',inv.powerMultiplier!==undefined?'x'+inv.powerMultiplier:'—'],['HIT SPEED',c.hits.toFixed(2)+'/s'],['DPS',c.dps?abbr(c.dps):'—'],['TOTAL KILLS',abbr(total)]];
   $('out').innerHTML=`<div class="who"><h2>${esc(name||'Player')}</h2></div>
-  <div class="hero">${tile('POWER',abbr(inv.power),full(inv.power),'var(--blue)')}${tile('GOLD',abbr(inv.gold),full(inv.gold),'var(--gold)')}${tile('LEVEL',fmt(inv.level),'','#3dffa0')}${tile('MAX HEALTH',abbr(inv.maxHealth),full(inv.maxHealth),'var(--bad)')}</div>
-  <div class="grid">
-   <div class="card gold"><h3>Core statistics</h3>${rows([['Gold multiplier',inv.goldMultiplier!==undefined?'x'+inv.goldMultiplier:undefined],['Power multiplier',inv.powerMultiplier!==undefined?'x'+inv.powerMultiplier:undefined],['Attack speed',typeof inv.attackSpeed==='number'?inv.attackSpeed.toFixed(2):undefined],...[['Experience',...num(inv,'experience')]],['Active books',books.length?books.join(', '):'None']])}</div>
-   <div class="card"><h3>Active loadout</h3>${rows([['Sword',sw[0]],['Sword stats',sw[2]],['Sword enchants',sw[1]],['Shield',sh[0]],['Shield stats',sh[2]],['Shield enchants',sh[1]],['Active pets',`${pets.length} / ${inv.maxActivePetCount??'—'}`],['Pets',pets.length?pets.map((p,i)=>pI[i]?pI[i].n:'Item #'+p.type).join(', '):'None'],['Pet bonus (sum)',bonus]])}</div>
-  </div>
+  <div class="hero">${tile('⚡ POWER',abbr(inv.power),full(inv.power),'var(--blue)')}${tile('🪙 GOLD',abbr(inv.gold),full(inv.gold),'var(--gold)')}${tile('⭐ LEVEL',L.toLocaleString(),'','#3dffa0',`<div class="bar" title="${(prog*100).toFixed(1)}% to next level"><i style="width:${(prog*100).toFixed(1)}%"></i></div>`)}${tile('⚔️ DAMAGE',c.dmg?abbr(c.dmg):'—',c.dmg?full(c.dmg):'','#ff7a3d')}${tile('❤️ MAX HEALTH',abbr(inv.maxHealth),full(inv.maxHealth),'var(--bad)')}</div>
+  <div class="mini">${mini.map(([l,v])=>`<div><small>${l}</small><b>${esc(v)}</b></div>`).join('')}</div>
   <div class="card" style="margin-top:14px"><h3>Inventory</h3>
-   <h4>SWORDS</h4>${cards(stacks(inv.swords,act(aS),1),'swords',1)}
-   <h4>SHIELDS</h4>${cards(stacks(inv.shields,act(aH),1),'shields',1)}
-   <h4>PETS</h4>${cards(stacks(inv.pets,pets.map(p=>p.itemId),0),'pets',0)}
-   <p class="note">Items that show as “Item #ID” are not matched to a name yet.</p></div>
-  <div class="card" style="margin-top:14px"><h3>Combat record <span class="tag">enemy names unconfirmed</span></h3>
-   ${kills.length?`<div class="kv"><span>Total kills</span><b title="${full(total)}">${abbr(total)}</b></div><div class="kills">${kills.map(([k,v])=>`<div class="kr"><span>${esc(ENEMY_NAMES[k]||'Type '+k)}</span><i style="width:${Math.max(2,v/max*100)}%"></i><b>${v.toLocaleString()}</b></div>`).join('')}</div>`:'<p class="empty">No kill data in this response.</p>'}</div>
-  <details><summary>Raw response</summary><pre>${esc(JSON.stringify(inv,null,2))}</pre></details>`;
+   <h4>SWORDS</h4>${cards(stacks(inv.swords,inv.activeSword&&inv.activeSword.itemId,'swords'),'swords')}
+   <h4>SHIELDS</h4>${cards(stacks(inv.shields,inv.activeShield&&inv.activeShield.itemId,'shields'),'shields')}
+   <h4>PETS</h4>${cards(stacks(inv.pets,(inv.activePets||[]).map(p=>p.itemId),'pets'),'pets')}</div>
+  <div class="card" style="margin-top:14px"><h3>Combat record</h3>
+   ${kills.length?`<div class="kv"><span>Total kills</span><b title="${full(total)}">${abbr(total)}</b></div><div class="kills">${kills.map(([k,v])=>`<div class="kr"><span>${esc(ENEMY_NAMES[k]||'Enemy '+k)}</span><i style="width:${Math.max(2,v/max*100)}%"></i><b>${v.toLocaleString()}</b></div>`).join('')}</div>`:'<p class="empty">No kill data available.</p>'}</div>
+  ${MAP?`<div style="margin-top:14px"><button class="go" id="cm" style="padding:12px 18px">COPY MAPPING JSON</button><details><summary>Raw response</summary><pre>${esc(JSON.stringify(inv,null,2))}</pre></details></div>`:''}`;
 }
+$('out').addEventListener('change',e=>{const t=e.target;if(!t.classList||!t.classList.contains('mp')||!t.value)return;const k=t.dataset.k;saved[k]=saved[k]||{};saved[k][t.dataset.t]=t.value;store.set('idmap',saved);IDMAP[k][t.dataset.t]=t.value;if(LAST)render(LAST[0],LAST[1]);});
+$('out').addEventListener('click',e=>{if(e.target.id==='cm'){try{navigator.clipboard.writeText(JSON.stringify(IDMAP));e.target.textContent='COPIED';}catch(x){}}});
 
 async function getPlayer(name){const r=await fetch('/api/lookup?username='+encodeURIComponent(name));const j=await r.json().catch(()=>({}));if(!r.ok||!j.success)throw new Error((j.error||'Lookup failed ('+r.status+').')+' ['+name+']');return j.data;}
 
@@ -343,7 +415,7 @@ $('go').onclick=lookup;$('u').addEventListener('keydown',e=>{if(e.key==='Enter')
 
 /* ---------- compare ---------- */
 const cnt=(o,k)=>Array.isArray(o[k])?o[k].length:0;
-const CR=[['Level',o=>+o.level||0,v=>v.toLocaleString()],['Power',o=>+o.power||0],['Gold',o=>+o.gold||0],['Max health',o=>+o.maxHealth||0],['Gold multiplier',o=>+o.goldMultiplier||0,v=>'x'+v],['Power multiplier',o=>+o.powerMultiplier||0,v=>'x'+v],['Attack speed',o=>+o.attackSpeed||0,v=>v.toFixed(2)],['Experience',o=>+o.experience||0],['Total kills',o=>Object.values(o.killedEnemyTypes||{}).reduce((t,v)=>t+(+v||0),0)],['Swords owned',o=>cnt(o,'swords'),v=>v],['Shields owned',o=>cnt(o,'shields'),v=>v],['Pets owned',o=>cnt(o,'pets'),v=>v]];
+const CR=[['Level',o=>+o.level||0,v=>v.toLocaleString()],['Power',o=>+o.power||0],['Damage per hit',o=>calc(o).dmg||0,v=>v?abbr(v):'—'],['DPS',o=>calc(o).dps||0,v=>v?abbr(v):'—'],['Gold',o=>+o.gold||0],['Max health',o=>+o.maxHealth||0],['Gold multiplier',o=>+o.goldMultiplier||0,v=>'x'+v],['Power multiplier',o=>+o.powerMultiplier||0,v=>'x'+v],['Attack speed',o=>+o.attackSpeed||0,v=>v.toFixed(2)],['Experience',o=>+o.experience||0],['Total kills',o=>Object.values(o.killedEnemyTypes||{}).reduce((t,v)=>t+(+v||0),0)],['Swords owned',o=>cnt(o,'swords'),v=>v],['Shields owned',o=>cnt(o,'shields'),v=>v],['Pets owned',o=>cnt(o,'pets'),v=>v]];
 async function compare(){
   const a=$('c1').value.trim(),b=$('c2').value.trim();$('cout').innerHTML='';
   if(!a||!b){$('cmsg').innerHTML='<div class="banner">Enter two usernames.</div>';return;}
@@ -369,7 +441,7 @@ Ice King|1e6|Icebreaker 50,Frostbite 35,Froststeel 20,Frostfang 12,Winter's Wrat
 Spiked Tortoise|250000|Sandstrike 25,Duneslicer 20|Sunshield 25
 Cursed Stone|5e5|Sandslasher 15|Barbed Sunward 20,Sunshroud 15
 Mummy|2e6|Sandslasher 15,Sunfire 7,Emberwraith 0.25|Sunshroud 15,Sandstone Shield 5,Emberwraith Shield 0.1
-Giant Moai|3e6|Blade of Sorrow 35,Flame Heart 30,Darkblade 20|Hell Shield 20,Shield of Fire 15
+Giga Moai|3e6|Blade of Sorrow 35,Flame Heart 30,Darkblade 20|Hell Shield 20,Shield of Fire 15
 Lava Rock|2e7|Flame Heart 30,Darkblade 20|Hell Shield 20,Shield of Fire 15
 Nether Lord|1e8|Darkblade 20,Fatecutter 10,Devil's Blade 0.01|Fire Rampart 10,Infernal Protection 1,Lord of Hell 0.01
 Zeus|8e8|Spear of Zeus 1|
@@ -389,7 +461,7 @@ Wargmaw|3e12|GraveBorn Edge 25|Crackshield 25
 Lornblade|25e12|Dreadmourne 10,GraveBorn Edge 25|Tombplate 10,Crackshield 25
 Mordolith|5e14|Soulkeeper's Blade 1|Sealguard 1`);
 const ELF='Bought from the Elf (chance depends on your level, up to 80%)';
-const ELFI=['Draco Devil','Divinity Edge','Last Horizon',"Dragon's Soul",'Asgardian Aegis','Final Bastion'];
+const ELFI=['Draco Devil',"Dragon's Devil",'Divinity Edge','Last Horizon',"Dragon's Soul",'Asgardian Aegis','Final Bastion'];
 const rarOf=n=>{const x=SWORDS.concat(SHIELDS).find(i=>i.n===n);return x?x.r:'Common';};
 const chip=d=>`<div class="kv"><span style="color:${RC[rarOf(d.n)]}">${esc(d.n)}</span><b>${d.c?d.c+'%':'?'}</b></div>`;
 function paintDrops(){
@@ -403,13 +475,38 @@ function paintDrops(){
 }
 $('dm').onchange=paintDrops;$('dq').oninput=paintDrops;paintDrops();
 
-/* ---------- tools (edit these values after verifying in-game) ---------- */
+/* ---------- staff team ---------- */
+const STAFF=[
+ {role:'Owner',label:'Owner',c:'var(--gold)',big:1,people:['Emre']},
+ {role:'Developers',label:'Developer',c:'var(--blue)',people:['Emre','Ersin','Hasanklnc','JustMelih','cuvan']},
+ {role:'Admins',label:'Admin',c:'var(--bad)',people:['JensJ56','burakersin','PRO9','Nice Face']},
+ {role:'Moderators',label:'Moderator',c:'#3dffa0',people:['saltbrgr','harmony','Triple','rin','ōttaM']}
+];
+$('staff').innerHTML='<h2 class="sh">Meet our Staff Team</h2><p class="ssub">The people who keep the community running.</p>'+STAFF.map(g=>`<h3 style="color:${g.c};margin:26px 0 12px;text-align:center">${g.role.toUpperCase()}</h3><div class="sg">${g.people.map(p=>`<div class="sc${g.big?' big':''}" style="--c:${g.c}"><div class="av">${esc([...p][0].toUpperCase())}</div><b>${esc(p)}</b><small>${g.label.toUpperCase()}</small></div>`).join('')}</div>`).join('');
+
+/* ---------- upgrade lab ---------- */
+const EN=[['Flame','Sword',[40,35,18,7],[15,45,25,15]],['Thorns','Shield',[50,35,12,3],[20,45,25,10]],['Looting','Sword & shield',[60,30,8,2],[25,42.5,22.5,10]],['Freeze','Sword',[65,27.5,6,1.5],[30,50,15,5]],['Fortune','Shield',[70,25,4,1],[50,40,7.5,2.5]]];
+const TIER=[[2000,1],[3000,3],[4000,5],[5000,7],[6000,10],[7000,15],[8000,20],[9000,25],[10000,30],[Infinity,33]];
+function paintLab(){
+  const L=+$('lvl').value||0,F=Math.max(0,Math.min(20,+$('ft').value||0)),t=Math.max(0,Math.min(1,(L-2000)/18000));
+  $('eo').innerHTML='<table><tr><th>Enchant</th><th>On</th><th>Fail</th><th>Lv I</th><th>Lv II</th><th>Lv III</th></tr>'+EN.map(([n,on,a,b])=>{
+    let c=a.map((v,i)=>v+(b[i]-v)*t);const mv=c[0]*.05*F,sum=c[1]+c[2]+c[3];
+    c=[c[0]-mv,...[1,2,3].map(i=>c[i]+mv*c[i]/sum)];
+    return `<tr><td>${n}</td><td>${on}</td>${c.map(v=>`<td>${+v.toFixed(2)}%</td>`).join('')}</tr>`;}).join('')+'</table>';
+  const pl=+$('pl').value||0,base=TIER.find(x=>pl<=x[0])[1],div=+$('pp').value,free=Math.min(100,base/div*(1+.05*F)),paid=Math.min(100,free*3);
+  $('po').innerHTML=rows([['Free attempt',+free.toFixed(2)+'%'],['Paid attempt',+paid.toFixed(2)+'%'],['Paid cost',div===19?'5QT gold':'1QT gold'],['Pets used',10]]);
+  const g=Math.max(2,Math.min(12,+$('mg').value||2));let f=1;for(let i=2;i<=g;i++)f*=i;
+  $('mo').innerHTML=rows([['Items needed',g+' × Level '+(g-1)],['Total Level 1 items',f.toLocaleString()]]);
+}
+['lvl','ft','pp','pl','mg'].forEach(i=>{$(i).oninput=paintLab;$(i).onchange=paintLab;});paintLab();
+
+/* ---------- tools ---------- */
 const REFERENCE={
-  stats:[['Active pet cap','3 (seen in player data)'],['Weapon level scaling','Not confirmed yet'],['Enchants','Flame, Thorns, Looting, Freeze, Fortune']],
-  enchants:[['S','Loot, Flame','Best for farming speed and damage'],['A','Thorns','Situational: defensive'],['B','Other enchants','Fill remaining slots']]
+  stats:[['Active pet cap','3'],['Gear level scaling','Base × (1 + 0.25 × (level − 1))'],['Hit speed','1 + 0.5 × level^(1/8) per second'],['Damage per hit','(Sword + 2√Power + 1) × (1 + Shield multi)']],
+  enchants:[['Flame','Sword','Burns for extra damage every second'],['Freeze','Sword','Slows enemies 75% for 1 / 2 / 3 seconds'],['Thorns','Shield','Reflects 1% of mob HP per level as power'],['Looting','Sword & shield','Total level 1–5 raises drops 1.6x to 4.0x'],['Fortune','Shield','+5% per level on smelting and pet enhancing']]
 };
 $('ref').innerHTML=rows(REFERENCE.stats);
-$('ench').innerHTML='<tr><th>Tier</th><th>Enchants</th><th>Why</th></tr>'+REFERENCE.enchants.map(r=>`<tr>${r.map(c=>`<td>${esc(c)}</td>`).join('')}</tr>`).join('');
+$('ench').innerHTML='<tr><th>Enchant</th><th>Slot</th><th>Effect</th></tr>'+REFERENCE.enchants.map(r=>`<tr>${r.map(c=>`<td>${esc(c)}</td>`).join('')}</tr>`).join('');
 
 function paintDb(){
   const k=$('dbk').value,q=$('dbq').value.toLowerCase().trim();
@@ -422,7 +519,7 @@ function paintDb(){
 }
 $('dbk').onchange=paintDb;$('dbq').oninput=paintDb;paintDb();
 
-const FLAGS=[['guild','Guild tracking checklist','A simple task list for your guild'],['compare','Item comparison calculator','Compare two items side by side'],['market','Market trade value estimator','Estimate what a trade is worth']];
+const FLAGS=[['guild','Guild tracking checklist','A simple task list for your guild']];
 const flags=store.get('flags',{});
 function paintFlags(){
   $('flags').innerHTML=FLAGS.map(([k,t,d])=>`<label class="tg"><input type="checkbox" data-k="${k}" ${flags[k]?'checked':''}><span>${t}<small>${d}${k==='guild'||k==='compare'?'':' (coming soon)'}</small></span></label>`).join('');
