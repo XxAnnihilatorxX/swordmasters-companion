@@ -46,6 +46,24 @@ pre{background:#0a0c13;border:1px solid var(--line);border-radius:8px;padding:14
 select{flex:1;min-width:0;background:#0a0c13;border:1px solid var(--line);border-radius:8px;color:var(--text);font:500 14px Inter;padding:12px}
 select{background:#0a0c13;border:1px solid var(--line);border-radius:8px;color:var(--text);font:500 15px Inter;padding:0 14px}
 .tbl{overflow:auto;max-height:420px;margin-top:10px;font-size:13px}
+nav{position:relative;overflow-x:auto;white-space:nowrap}
+nav button[aria-selected=true]{border-color:transparent}
+.ind{position:absolute;bottom:0;height:2px;background:var(--gold);box-shadow:0 0 12px var(--gold);transition:left .3s ease,width .3s ease}
+main>section{animation:fade .35s ease}@keyframes fade{from{opacity:0;transform:translateY(6px)}}
+.brand{display:flex;gap:14px;align-items:center}.comm{font:700 12px Orbitron;color:var(--blue);letter-spacing:.2em;margin-top:2px}
+.who h2{font-size:20px;margin:20px 0 4px}
+.hero{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));margin-top:12px}
+.tile{background:var(--card);border:1px solid var(--line);border-top:3px solid var(--c);border-radius:12px;padding:14px;text-align:center}
+.tile small{color:var(--mute);letter-spacing:.15em;font-size:11px}.tile b{display:block;font:800 26px Orbitron;color:var(--c);margin-top:4px;text-shadow:0 0 14px var(--c)}
+h4{margin:16px 0 8px;font:600 11px Orbitron;color:var(--mute);letter-spacing:.15em}
+.inv{display:flex;flex-wrap:wrap;gap:10px}
+.it{position:relative;width:138px;min-height:96px;background:#0f1322;border:1px solid var(--rc);border-top:4px solid var(--rc);border-radius:8px;padding:8px}
+.it.eq{box-shadow:0 0 14px var(--rc)}.it .top{display:flex;justify-content:space-between;font:700 10px Orbitron;color:var(--rc)}
+.it .lv{background:#0a0c13;border:1px solid var(--line);color:var(--text);padding:0 6px;border-radius:4px}
+.it .nm{font:700 13px Orbitron;margin:10px 0 4px}.it .en{font-size:11px;color:var(--mute)}
+.it .x{position:absolute;right:6px;bottom:6px;font:700 11px Orbitron;color:var(--rc);border:1px solid var(--rc);border-radius:4px;padding:0 6px}
+.it .eqt{position:absolute;left:8px;bottom:6px;font:700 9px Orbitron;color:var(--gold)}
+.win{color:var(--gold);font-weight:700;text-shadow:0 0 10px #ffc83d55}#cout td,#cout th{text-align:center}
 .hidden{display:none}
 .check{display:flex;gap:8px;align-items:center;padding:5px 0}
 @media(max-width:520px){.search{flex-direction:column}.go{padding:14px}}
@@ -54,9 +72,12 @@ select{background:#0a0c13;border:1px solid var(--line);border-radius:8px;color:v
 </head>
 <body>
 <main>
-<h1>SWORDMASTERS <span>COMPANION HUB</span></h1>
+<div class="brand"><svg width="46" height="46" viewBox="0 0 48 48" aria-hidden="true"><path d="M24 3 42 10v14c0 11-8 18-18 21C14 42 6 35 6 24V10z" fill="#151927" stroke="#ffc83d" stroke-width="2"/><path d="M24 11v22M18 29h12M24 11l-3 5h6z" stroke="#38b6ff" stroke-width="2.5" stroke-linecap="round" fill="none"/></svg>
+<div><h1>SWORDMASTERS <span>COMPANION HUB</span></h1><div class="comm hidden" id="comm"></div></div></div>
 <nav role="tablist">
   <button role="tab" aria-selected="true" data-tab="search">Player lookup</button>
+  <button role="tab" aria-selected="false" data-tab="compare">Compare players</button>
+  <button role="tab" aria-selected="false" data-tab="drops">Drop finder</button>
   <button role="tab" aria-selected="false" data-tab="tools">Optimizer &amp; Hub Tools</button>
 </nav>
 
@@ -69,6 +90,14 @@ select{background:#0a0c13;border:1px solid var(--line);border-radius:8px;color:v
   <div id="out"></div>
 </section>
 
+<section id="compare" class="hidden">
+  <div class="search"><input id="c1" type="text" placeholder="Player 1" maxlength="32" aria-label="Player 1"><input id="c2" type="text" placeholder="Player 2" maxlength="32" aria-label="Player 2"><button class="go" id="cgo">COMPARE</button></div>
+  <div id="cmsg" aria-live="polite"></div><div id="cout"></div>
+</section>
+<section id="drops" class="hidden">
+  <div class="search"><select id="dm" aria-label="Mode"><option value="enemy">By enemy</option><option value="item">By item</option></select><input id="dq" type="text" placeholder="Search" aria-label="Search drops"></div>
+  <div id="dout" class="grid"></div>
+</section>
 <section id="tools" class="hidden">
   <div class="grid">
     <div class="card gold">
@@ -91,7 +120,7 @@ select{background:#0a0c13;border:1px solid var(--line);border-radius:8px;color:v
     <div class="card" style="grid-column:1/-1">
       <h3>Item database <span class="tag">from wiki</span></h3>
       <div class="search"><select id="dbk" aria-label="Category"><option value="swords">Swords</option><option value="shields">Shields</option><option value="pets">Pets</option></select>
-      <input id="dbq" type="text" placeholder="Filter by name or # (type number)" aria-label="Filter"></div>
+      <input id="dbq" type="text" placeholder="Filter by name" aria-label="Filter"></div>
       <div class="tbl" id="dbt"></div>
     </div>
     <div class="card hidden" id="guild">
@@ -113,10 +142,13 @@ const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'
 const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
 
 /* ---------- tabs ---------- */
-document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
-  document.querySelectorAll('nav button').forEach(x=>x.setAttribute('aria-selected',x===b));
-  ['search','tools'].forEach(t=>$(t).classList.toggle('hidden',t!==b.dataset.tab));
-});
+const TABS=['search','compare','drops','tools'],nav=document.querySelector('nav');
+nav.insertAdjacentHTML('beforeend','<span class="ind"></span>');
+function moveInd(){const b=nav.querySelector('[aria-selected=true]'),i=nav.querySelector('.ind');i.style.left=b.offsetLeft+'px';i.style.width=b.offsetWidth+'px';}
+nav.querySelectorAll('button').forEach(b=>b.onclick=()=>{nav.querySelectorAll('button').forEach(x=>x.setAttribute('aria-selected',x===b));TABS.forEach(t=>$(t).classList.toggle('hidden',t!==b.dataset.tab));moveInd();});
+addEventListener('resize',moveInd);if(document.fonts)document.fonts.ready.then(moveInd);moveInd();
+const SITE={community:''}; /* put your community name here */
+if(SITE.community){$('comm').textContent=SITE.community;$('comm').classList.remove('hidden');document.title=SITE.community+' · SwordMasters Hub';}
 
 /* ---------- lookup ---------- */
 /* Optional: fill in real names once you know them (id -> name). Unknown ids show as "Type N". */
@@ -257,38 +289,43 @@ const ench=a=>Array.isArray(a)&&a.length?a.map(e=>`${ENCHANT_NAMES[e.type]||'Enc
 const sline=(o,keys)=>keys.filter(k=>o[k]).map(k=>LBL[k]+' '+(BIG.includes(k)?abbr(o[k]):'x'+o[k])).join(' · ')||'—';
 const gear=(g,L,K)=>{if(!g||typeof g!=='object')return ['—','—','—','—'];const it=L[g.type];return [`${it?it.n:'Type '+g.type} · Lv ${g.level}`,ench(g.enchantments),g.itemId,it?sline(it,K):'—'];};
 
-function render(inv){
-  const sw=gear(inv.activeSword,SWORDS,SW_K),sh=gear(inv.activeShield,SHIELDS,SH_K);
-  const pets=Array.isArray(inv.activePets)?inv.activePets:[];
-  const books=Array.isArray(inv.activeBooks)?inv.activeBooks:[];
-  const usedBooks=books.filter(b=>b>0);
+/* Confirmed in-game IDs only (from reference screenshots). Unknown IDs show as "Item #ID". Add more as they are verified. */
+const IDMAP={swords:{44:"Soulkeeper's Blade"},shields:{5:'Shield of the Kingdom',42:'Sealguard'},pets:{21:'XPeppy',22:'XAxolotl',23:'XPengoo',24:'XLeo'}};
+const byId=(k,t)=>{const n=IDMAP[k][t];return n?{swords:SWORDS,shields:SHIELDS,pets:PETS}[k].find(x=>x.n===n):undefined;};
+const RC={Common:'#8890ab',Rare:'#38b6ff',Epic:'#b36bff',Legendary:'#ffc83d'};
+const tile=(l,v,tip,c)=>`<div class="tile" style="--c:${c}"><small>${l}</small><b title="${esc(tip||'')}">${esc(v)}</b></div>`;
+function stacks(list,activeIds,lvl){const m=new Map();(list||[]).forEach(o=>{const k=o.type+'|'+(lvl?o.level+ench(o.enchantments):'');const g=m.get(k)||{o,n:0,eq:false};g.n++;if(activeIds.includes(o.itemId))g.eq=true;m.set(k,g);});return [...m.values()].sort((a,b)=>b.eq-a.eq||b.o.type-a.o.type);}
+function cards(groups,kind,lvl){return groups.length?`<div class="inv">${groups.map(({o,n,eq})=>{const it=byId(kind,o.type),rc=it?RC[it.r]:'#4a5170';
+  return `<div class="it${eq?' eq':''}" style="--rc:${rc}"><div class="top">${lvl?`<span class="lv">LV ${o.level}</span>`:'<span></span>'}<span>${it?it.r.toUpperCase():'UNKNOWN'}</span></div><div class="nm">${esc(it?it.n:'Item #'+o.type)}</div>${lvl&&o.enchantments&&o.enchantments.length?`<div class="en">${esc(ench(o.enchantments))}</div>`:''}${eq?'<span class="eqt">EQUIPPED</span>':''}${n>1?`<span class="x">x${n}</span>`:''}</div>`;}).join('')}</div>`:'<p class="empty">None</p>';}
+
+function render(inv,name){
+  const aS=inv.activeSword,aH=inv.activeShield,sI=aS&&byId('swords',aS.type),hI=aH&&byId('shields',aH.type);
+  const pets=Array.isArray(inv.activePets)?inv.activePets:[],pI=pets.map(p=>byId('pets',p.type));
+  const books=(Array.isArray(inv.activeBooks)?inv.activeBooks:[]).filter(b=>b>0);
+  const gr=(g,it,K)=>g?[`${it?it.n+' ('+it.r+')':'Item #'+g.type} · Lv ${g.level}`,ench(g.enchantments),it?sline(it,K):'—']:['—','—','—'];
+  const sw=gr(aS,sI,SW_K),sh=gr(aH,hI,SH_K);
+  const sum=k=>+pI.reduce((t,p)=>t+p[k],0).toFixed(2);
+  const bonus=pets.length&&pI.every(Boolean)?`Gold x${sum('gold')} · Power x${sum('pow')}`:undefined;
   const kills=Object.entries(inv.killedEnemyTypes||{}).map(([k,v])=>[k,+v||0]).sort((a,b)=>b[1]-a[1]);
   const total=kills.reduce((t,[,v])=>t+v,0),max=kills.length?kills[0][1]:1;
-  const c=k=>Array.isArray(inv[k])?inv[k].length:undefined;
-  $('out').innerHTML=`<div class="grid">
-   <div class="card gold"><h3>Core statistics</h3>${rows([
-     ['Level',...num(inv,'level')],['Total power',...num(inv,'power')],['Gold',...num(inv,'gold')],
-     ['Health',inv.health!==undefined?`${abbr(inv.health)} / ${abbr(inv.maxHealth)}`:undefined,`${full(inv.health)} / ${full(inv.maxHealth)}`],
-     ['Gold multiplier',inv.goldMultiplier!==undefined?'x'+inv.goldMultiplier:undefined],
-     ['Power multiplier',inv.powerMultiplier!==undefined?'x'+inv.powerMultiplier:undefined],
-     ['Attack speed',typeof inv.attackSpeed==='number'?inv.attackSpeed.toFixed(2):undefined],
-     ['Experience',...num(inv,'experience')]])}</div>
-   <div class="card"><h3>Active loadout</h3>${rows([
-     ['Sword',sw[0]],['Base stats',sw[3]],['Sword enchants',sw[1]],['Sword item ID',sw[2]],
-     ['Shield',sh[0]],['Base stats',sh[3]],['Shield enchants',sh[1]],['Shield item ID',sh[2]],
-     ['Active pets',`${pets.length} / ${inv.maxActivePetCount??'—'}`],
-     ['Pet types',pets.length?pets.map(p=>(PETS[p.type]||{n:'Type '+p.type}).n).join(', '):'None'],
-     ['Active books',usedBooks.length?usedBooks.join(', '):`None (${books.length} slots empty)`]])}</div>
-   <div class="card"><h3>Collection</h3>${rows([
-     ['Swords owned',c('swords')],['Shields owned',c('shields')],['Pets owned',c('pets')],['Books owned',c('books')],
-     ['Helmets',c('helmets')],['Torsos',c('torsos')],['Pants',c('pants')],['Shoes',c('shoes')]])}</div>
-   <div class="card" style="grid-column:1/-1"><h3>Combat record</h3>
-     ${kills.length?`<div class="kv"><span>Total kills</span><b title="${full(total)}">${abbr(total)}</b></div>
-     <div class="kills">${kills.map(([k,v])=>`<div class="kr"><span>${esc(ENEMY_NAMES[k]||'Type '+k)}</span><i style="width:${Math.max(2,v/max*100)}%"></i><b>${v.toLocaleString()}</b></div>`).join('')}</div>`
-     :'<p class="empty">No kill data in this response.</p>'}</div>
+  const act=(a)=>(a?[a.itemId]:[]);
+  $('out').innerHTML=`<div class="who"><h2>${esc(name||'Player')}</h2></div>
+  <div class="hero">${tile('POWER',abbr(inv.power),full(inv.power),'var(--blue)')}${tile('GOLD',abbr(inv.gold),full(inv.gold),'var(--gold)')}${tile('LEVEL',fmt(inv.level),'','#3dffa0')}${tile('MAX HEALTH',abbr(inv.maxHealth),full(inv.maxHealth),'var(--bad)')}</div>
+  <div class="grid">
+   <div class="card gold"><h3>Core statistics</h3>${rows([['Gold multiplier',inv.goldMultiplier!==undefined?'x'+inv.goldMultiplier:undefined],['Power multiplier',inv.powerMultiplier!==undefined?'x'+inv.powerMultiplier:undefined],['Attack speed',typeof inv.attackSpeed==='number'?inv.attackSpeed.toFixed(2):undefined],...[['Experience',...num(inv,'experience')]],['Active books',books.length?books.join(', '):'None']])}</div>
+   <div class="card"><h3>Active loadout</h3>${rows([['Sword',sw[0]],['Sword stats',sw[2]],['Sword enchants',sw[1]],['Shield',sh[0]],['Shield stats',sh[2]],['Shield enchants',sh[1]],['Active pets',`${pets.length} / ${inv.maxActivePetCount??'—'}`],['Pets',pets.length?pets.map((p,i)=>pI[i]?pI[i].n:'Item #'+p.type).join(', '):'None'],['Pet bonus (sum)',bonus]])}</div>
   </div>
-  <p class="note">Item, pet and enemy names are matched from type numbers using the wiki order. If a name looks wrong, the mapping needs adjusting.</p><details><summary>Raw response</summary><pre>${esc(JSON.stringify(inv,null,2))}</pre></details>`;
+  <div class="card" style="margin-top:14px"><h3>Inventory</h3>
+   <h4>SWORDS</h4>${cards(stacks(inv.swords,act(aS),1),'swords',1)}
+   <h4>SHIELDS</h4>${cards(stacks(inv.shields,act(aH),1),'shields',1)}
+   <h4>PETS</h4>${cards(stacks(inv.pets,pets.map(p=>p.itemId),0),'pets',0)}
+   <p class="note">Items that show as “Item #ID” are not matched to a name yet.</p></div>
+  <div class="card" style="margin-top:14px"><h3>Combat record <span class="tag">enemy names unconfirmed</span></h3>
+   ${kills.length?`<div class="kv"><span>Total kills</span><b title="${full(total)}">${abbr(total)}</b></div><div class="kills">${kills.map(([k,v])=>`<div class="kr"><span>${esc(ENEMY_NAMES[k]||'Type '+k)}</span><i style="width:${Math.max(2,v/max*100)}%"></i><b>${v.toLocaleString()}</b></div>`).join('')}</div>`:'<p class="empty">No kill data in this response.</p>'}</div>
+  <details><summary>Raw response</summary><pre>${esc(JSON.stringify(inv,null,2))}</pre></details>`;
 }
+
+async function getPlayer(name){const r=await fetch('/api/lookup?username='+encodeURIComponent(name));const j=await r.json().catch(()=>({}));if(!r.ok||!j.success)throw new Error((j.error||'Lookup failed ('+r.status+').')+' ['+name+']');return j.data;}
 
 async function lookup(){
   const name=$('u').value.trim();
@@ -299,11 +336,73 @@ async function lookup(){
     const r=await fetch('/api/lookup?username='+encodeURIComponent(name));
     const j=await r.json().catch(()=>({}));
     if(!r.ok||!j.success)throw new Error(j.error||'Lookup failed ('+r.status+').');
-    $('msg').innerHTML='';render(j.data);
+    $('msg').innerHTML='';render(j.data,name);
   }catch(e){$('msg').innerHTML=`<div class="banner">${esc(e.message)}</div>`;}
   finally{$('go').disabled=false;}
 }
 $('go').onclick=lookup;$('u').addEventListener('keydown',e=>{if(e.key==='Enter')lookup();});
+
+/* ---------- compare ---------- */
+const cnt=(o,k)=>Array.isArray(o[k])?o[k].length:0;
+const CR=[['Level',o=>+o.level||0,v=>v.toLocaleString()],['Power',o=>+o.power||0],['Gold',o=>+o.gold||0],['Max health',o=>+o.maxHealth||0],['Gold multiplier',o=>+o.goldMultiplier||0,v=>'x'+v],['Power multiplier',o=>+o.powerMultiplier||0,v=>'x'+v],['Attack speed',o=>+o.attackSpeed||0,v=>v.toFixed(2)],['Experience',o=>+o.experience||0],['Total kills',o=>Object.values(o.killedEnemyTypes||{}).reduce((t,v)=>t+(+v||0),0)],['Swords owned',o=>cnt(o,'swords'),v=>v],['Shields owned',o=>cnt(o,'shields'),v=>v],['Pets owned',o=>cnt(o,'pets'),v=>v]];
+async function compare(){
+  const a=$('c1').value.trim(),b=$('c2').value.trim();$('cout').innerHTML='';
+  if(!a||!b){$('cmsg').innerHTML='<div class="banner">Enter two usernames.</div>';return;}
+  $('cgo').disabled=true;$('cmsg').innerHTML='<div class="loading"><div class="spin"></div>Looking up both players…</div>';
+  try{const [x,y]=await Promise.all([getPlayer(a),getPlayer(b)]);let wa=0,wb=0;
+    const body=CR.map(([l,f,sh])=>{const p=f(x),q=f(y),w=p>q?1:q>p?2:0;if(w===1)wa++;if(w===2)wb++;const d=sh||abbr;return `<tr><td class="${w===1?'win':''}">${esc(d(p))}</td><th>${l}</th><td class="${w===2?'win':''}">${esc(d(q))}</td></tr>`;}).join('');
+    $('cmsg').innerHTML='';
+    $('cout').innerHTML=`<div class="card" style="margin-top:18px"><h3>${esc(a)} vs ${esc(b)}</h3><table><tr><th>${esc(a)}</th><th></th><th>${esc(b)}</th></tr>${body}</table><p class="note">${esc(a)} leads ${wa} rows · ${esc(b)} leads ${wb}</p></div>`;
+  }catch(e){$('cmsg').innerHTML=`<div class="banner">${esc(e.message)}</div>`;}
+  finally{$('cgo').disabled=false;}
+}
+$('cgo').onclick=compare;[$('c1'),$('c2')].forEach(i=>i.addEventListener('keydown',e=>{if(e.key==='Enter')compare();}));
+
+/* ---------- drop finder (from the wiki enemy tables) ---------- */
+const Q=t=>t.trim().split('\n').map(l=>{const a=l.split('|');const it=x=>x?x.split(',').map(y=>{const m=y.trim().match(/^(.*?)(?: ([\d.]+))?$/);return {n:m[1],c:m[2]};}):[];return {n:a[0],hp:+a[1],sw:it(a[2]),sh:it(a[3])};});
+const ENEMIES=Q(`Roundhead|100|Old Sword 25,Orc Sword 20|Wooden Shield 25
+Forest Orc|2500|Orc Sword 20,Double-Edged Sword 15|Iron Shield 20,Elite Shield 15
+Bonechewer|10000|Double-Edged Sword 15,Spiked Sword 10,Dead Man's Sword 3|Elite Shield 15,Warrior's Shield 10,Shield of the Kingdom 2
+Cocoa Guardian|15000|Machete Sword 20,Scimitar Claw 15|Sweetguard 24
+Chocolate Knight|50000|Scimitar Claw 15,Morbid Will 8|Sweetguard 24,Warden's Shield 18,Light Barrier 14
+Mallowbeast|5e5|Morbid Will 8,Inferno Claw 4,Burned Spikeblade 1|Obsidian Canny 7,Dead Guard's Shield 3
+Ice King|1e6|Icebreaker 50,Frostbite 35,Froststeel 20,Frostfang 12,Winter's Wrath 1|Snowfall Defender 50,Arctic Ward 35,Icy Rampart 15,Frozen Fortress 7,Winter's Wrathguard 1
+Spiked Tortoise|250000|Sandstrike 25,Duneslicer 20|Sunshield 25
+Cursed Stone|5e5|Sandslasher 15|Barbed Sunward 20,Sunshroud 15
+Mummy|2e6|Sandslasher 15,Sunfire 7,Emberwraith 0.25|Sunshroud 15,Sandstone Shield 5,Emberwraith Shield 0.1
+Giant Moai|3e6|Blade of Sorrow 35,Flame Heart 30,Darkblade 20|Hell Shield 20,Shield of Fire 15
+Lava Rock|2e7|Flame Heart 30,Darkblade 20|Hell Shield 20,Shield of Fire 15
+Nether Lord|1e8|Darkblade 20,Fatecutter 10,Devil's Blade 0.01|Fire Rampart 10,Infernal Protection 1,Lord of Hell 0.01
+Zeus|8e8|Spear of Zeus 1|
+Crokora|1e8|Coral Blade 20|Steel Shield 20
+Hydrino|3e8|Coral Blade 20,Spiked Moss 7|Steel Shield 20
+Temple Guardian|5e8|Spiked Moss 7,Guardian's Spear 0.0001|Hardened Moss 1,Guardian's Protection 0.01
+Bouugo|1e9|Starfire Blade 25|Nebula Shield 25
+Anaxion|3e9|Starfire Blade 25,Nova Blade 7|Nebula Shield 25,Starburst Shield 3
+Xenomor|6e9|Nova Blade 7,Cosmic Blader 0.00001|Starburst Shield 3,Lunar Shield 0.0001
+Dragon Guardian|5e9|Dragon's Teeth 1|Dragon's Shell 1
+Dragon|1e11|Dragon's Poison 1|Dragon's Anger 1
+Reaper|3e12|Netherite Blade 5,Death's Scythe 1|Death's Shield 1
+Thrones|1e12|Einherjar's Blade|Einherjar's Guard
+Seraphim|5e12|Runebreaker 10,Einherjar's Blade 25|Runeguard 10,Einherjar's Guard 25
+The Rival|1e14|Runebreaker 10,Solbrand 1|Sunward Bulwark 1
+Wargmaw|3e12|GraveBorn Edge 25|Crackshield 25
+Lornblade|25e12|Dreadmourne 10,GraveBorn Edge 25|Tombplate 10,Crackshield 25
+Mordolith|5e14|Soulkeeper's Blade 1|Sealguard 1`);
+const ELF='Bought from the Elf (chance depends on your level, up to 80%)';
+const ELFI=['Draco Devil','Divinity Edge','Last Horizon',"Dragon's Soul",'Asgardian Aegis','Final Bastion'];
+const rarOf=n=>{const x=SWORDS.concat(SHIELDS).find(i=>i.n===n);return x?x.r:'Common';};
+const chip=d=>`<div class="kv"><span style="color:${RC[rarOf(d.n)]}">${esc(d.n)}</span><b>${d.c?d.c+'%':'?'}</b></div>`;
+function paintDrops(){
+  const m=$('dm').value,q=$('dq').value.toLowerCase().trim();let h='';
+  $('dq').placeholder=m==='enemy'?'Search enemies (empty = all)':'Search an item, e.g. Sealguard';
+  if(m==='enemy'){ENEMIES.filter(e=>!q||e.n.toLowerCase().includes(q)).forEach(e=>{h+=`<div class="card"><h3>${esc(e.n)}</h3><div class="kv"><span>Health</span><b>${abbr(e.hp)}</b></div><h4>SWORDS</h4>${e.sw.map(chip).join('')||'<p class="empty">None</p>'}<h4>SHIELDS</h4>${e.sh.map(chip).join('')||'<p class="empty">None</p>'}</div>`;});}
+  else if(q){SWORDS.concat(SHIELDS).filter(i=>i.n.toLowerCase().includes(q)).slice(0,12).forEach(i=>{const src=[];ENEMIES.forEach(e=>e.sw.concat(e.sh).forEach(d=>{if(d.n===i.n)src.push(`<div class="kv"><span>${esc(e.n)}</span><b>${d.c?d.c+'%':'?'}</b></div>`);}));
+    h+=`<div class="card" style="border-top:3px solid ${RC[i.r]}"><h3 style="color:${RC[i.r]}">${esc(i.n)}</h3><p class="note" style="margin:0 0 8px">${i.r}</p>${src.join('')||`<p class="empty">${ELFI.includes(i.n)?ELF:'No enemy drop listed'}</p>`}</div>`;});}
+  else h='<p class="empty">Type an item name to see which enemies drop it.</p>';
+  $('dout').innerHTML=h||'<p class="empty">No matches.</p>';
+}
+$('dm').onchange=paintDrops;$('dq').oninput=paintDrops;paintDrops();
 
 /* ---------- tools (edit these values after verifying in-game) ---------- */
 const REFERENCE={
@@ -318,9 +417,9 @@ function paintDb(){
   const cols=k==='pets'?['gold','pow','spd']:k==='swords'?SW_K:SH_K;
   const list={swords:SWORDS,shields:SHIELDS,pets:PETS}[k];
   const cell=(it,f)=>BIG.includes(f)?abbr(it[f]):(it[f]||'—');
-  const body=list.map((it,i)=>[i,it]).filter(([i,it])=>!q||it.n.toLowerCase().includes(q)||String(i)===q)
-    .map(([i,it])=>`<tr><td>${i}</td><td>${esc(it.n)}</td><td>${esc(it.r)}</td>${cols.map(f=>`<td>${cell(it,f)}</td>`).join('')}</tr>`).join('');
-  $('dbt').innerHTML=`<table><tr><th>#</th><th>Name</th><th>Rarity</th>${cols.map(f=>`<th>${LBL[f]}</th>`).join('')}</tr>${body||'<tr><td colspan="9">No matches</td></tr>'}</table>`;
+  const body=list.map((it,i)=>[i,it]).filter(([i,it])=>!q||it.n.toLowerCase().includes(q))
+    .map(([i,it])=>`<tr><td>${esc(it.n)}</td><td>${esc(it.r)}</td>${cols.map(f=>`<td>${cell(it,f)}</td>`).join('')}</tr>`).join('');
+  $('dbt').innerHTML=`<table><tr><th>Name</th><th>Rarity</th>${cols.map(f=>`<th>${LBL[f]}</th>`).join('')}</tr>${body||'<tr><td colspan="9">No matches</td></tr>'}</table>`;
 }
 $('dbk').onchange=paintDb;$('dbq').oninput=paintDb;paintDb();
 
