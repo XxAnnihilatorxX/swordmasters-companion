@@ -87,6 +87,22 @@ input[type=number]{flex:1;min-width:0;background:#0a0c13;border:1px solid var(--
 .av{width:58px;height:58px;border-radius:50%;margin:0 auto 12px;display:grid;place-items:center;font:800 22px Orbitron;color:var(--c);border:2px solid var(--c);box-shadow:0 0 18px var(--c);background:#0a0c13}
 .sc.big .av{width:74px;height:74px;font-size:28px}
 .sc b{display:block;font:700 15px Orbitron}.sc small{display:block;color:var(--c);letter-spacing:.16em;font-size:10px;margin-top:6px}
+.wc{background:#0f1322;border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.wc h5{margin:0 0 6px;font:700 12px Orbitron;color:var(--blue);letter-spacing:.12em}
+.ws{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));margin-top:12px}
+.er{position:relative;display:flex;justify-content:space-between;gap:10px;padding:7px 0 9px;font-size:13px}
+.er b{font-weight:600}.er i{position:absolute;left:0;bottom:2px;height:2px;border-radius:2px;background:linear-gradient(90deg,var(--blue),var(--gold))}
+.er.boss span{color:var(--gold)}.er em,.bt{font:700 9px Orbitron;font-style:normal;border:1px solid var(--gold);border-radius:4px;padding:0 5px;margin-left:8px}
+.er.z{opacity:.35}
+.sh,.ssub{text-align:left}.sh{margin:8px 0 2px}
+.sg{grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+.sc,.sc.big{display:flex;align-items:center;gap:14px;text-align:left;padding:14px 16px;max-width:none;margin:0}
+.sc.big{padding:20px 18px}.av,.sc.big .av{margin:0;flex:none;overflow:hidden}.sc.big .av{width:74px;height:74px}.av img{width:100%;height:100%;object-fit:cover}
+.sc small{margin-top:4px}
+.wi{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin-bottom:10px}
+.wi label{display:grid;gap:4px;font-size:11px;color:var(--mute);letter-spacing:.08em}
+.wi input,.wi select{width:100%;padding:10px 12px;background:#0a0c13;border:1px solid var(--line);border-radius:8px;color:var(--text);font:500 14px Inter}
+.bt{font:700 9px Orbitron;font-style:normal;border:1px solid var(--gold);color:var(--gold);border-radius:4px;padding:0 5px;margin-left:6px}
 .hidden{display:none}
 .check{display:flex;gap:8px;align-items:center;padding:5px 0}
 @media(max-width:520px){.search{flex-direction:column}.go{padding:14px}}
@@ -101,6 +117,7 @@ input[type=number]{flex:1;min-width:0;background:#0a0c13;border:1px solid var(--
   <button role="tab" aria-selected="false" data-tab="compare">Compare players</button>
   <button role="tab" aria-selected="false" data-tab="drops">Drop finder</button>
   <button role="tab" aria-selected="false" data-tab="lab">Upgrade Lab</button>
+  <button role="tab" aria-selected="false" data-tab="info">Game Info</button>
   <button role="tab" aria-selected="false" data-tab="tools">Optimizer &amp; Hub Tools</button>
   <button role="tab" aria-selected="false" data-tab="staff">Staff Team</button>
 </nav>
@@ -133,7 +150,22 @@ input[type=number]{flex:1;min-width:0;background:#0a0c13;border:1px solid var(--
    <div class="card"><h3>Merge calculator</h3>
     <input id="mg" type="number" min="2" max="12" value="5" aria-label="Target level" style="width:100%">
     <div id="mo"></div></div>
+   <div class="card" style="grid-column:1/-1"><h3>Damage calculator</h3>
+    <div class="wi"><label>Power<input id="wp" type="text" value="1e12" placeholder="e.g. 1.02SXT"></label><label>Player level<input id="wl" type="number" min="1" value="10000"></label>
+     <label>Sword<select id="ws"></select></label><label>Sword level<input id="wsl" type="number" min="1" value="1"></label><label>Flame level<select id="wf"><option>0</option><option>1</option><option>2</option><option>3</option></select></label>
+     <label>Shield<select id="wh"></select></label><label>Shield level<input id="whl" type="number" min="1" value="1"></label></div>
+    <div id="wo"></div><button class="go" id="wload" style="padding:10px 16px;margin-top:10px">USE LAST LOOKUP</button></div>
+   <div class="card"><h3>Clan buildings</h3>
+    <div class="wi"><label>Castle<select id="cc0"><option>0</option><option>1</option><option>2</option></select></label><label>Tent 1<select id="cc1"><option>0</option><option>1</option><option>2</option></select></label><label>Tent 2<select id="cc2"><option>0</option><option>1</option><option>2</option></select></label><label>Tent 3<select id="cc3"><option>0</option><option>1</option><option>2</option></select></label><label>Tent 4<select id="cc4"><option>0</option><option>1</option><option>2</option></select></label></div>
+    <div id="co"></div></div>
+   <div class="card"><h3>Campfire donation</h3>
+    <div class="wi"><label>Base sell value<input id="cg" type="text" value="1e9"></label><label>Item level<input id="cl" type="number" min="1" value="1"></label></div>
+    <div id="cf"></div></div>
   </div>
+</section>
+<section id="info" class="hidden">
+  <div class="search"><select id="gk" aria-label="Category"><option value="armor">Armor</option><option value="enemies">Enemies</option><option value="ores">Ores</option></select><input id="gq" type="text" placeholder="Filter" aria-label="Filter"></div>
+  <div class="tbl" id="gt" style="max-height:70vh"></div>
 </section>
 <section id="staff" class="hidden"></section>
 <section id="tools" class="hidden">
@@ -180,7 +212,7 @@ const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'
 const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
 
 /* ---------- tabs ---------- */
-const TABS=['search','compare','drops','lab','tools','staff'],nav=document.querySelector('nav');
+const TABS=['search','compare','drops','lab','info','tools','staff'],nav=document.querySelector('nav');
 nav.insertAdjacentHTML('beforeend','<span class="ind"></span>');
 function moveInd(){const b=nav.querySelector('[aria-selected=true]'),i=nav.querySelector('.ind');i.style.left=b.offsetLeft+'px';i.style.width=b.offsetWidth+'px';}
 nav.querySelectorAll('button').forEach(b=>b.onclick=()=>{nav.querySelectorAll('button').forEach(x=>x.setAttribute('aria-selected',x===b));TABS.forEach(t=>$(t).classList.toggle('hidden',t!==b.dataset.tab));moveInd();});
@@ -353,8 +385,8 @@ const sc=g=>1+.25*(((g&&g.level)||1)-1);
 const slots=(o,k)=>ENS[k].map(([t,n,c])=>{const e=(o.enchantments||[]).find(x=>x.type===t);return `<div class="sl${e?' on':''}" style="--e:${c}"><span>${n}</span><b>${e?(ROM[e.level]||e.level):'—'}</b></div>`;}).join('');
 const tile=(l,v,tip,c,x='')=>`<div class="tile" style="--c:${c}"><small>${l}</small><b title="${esc(tip||'')}">${esc(v)}</b>${x}</div>`;
 
-function calc(inv){
-  const P=+inv.power||0,lvl=+inv.level||0,aS=inv.activeSword,aH=inv.activeShield;
+function calc(inv,aS=inv.activeSword,aH=inv.activeShield){
+  const P=+inv.power||0,lvl=+inv.level||0;
   const sI=aS&&byId('swords',aS.type),hI=aH&&byId('shields',aH.type),hits=1+.5*Math.pow(lvl,1/8);
   if(!sI||(aH&&!hI))return {hits};
   const DS=sI.dmg*sc(aS),MS=hI?hI.dm*sc(aH):0,r=Math.sqrt(P),dmg=(DS+2*r+1)*(1+MS);
@@ -374,23 +406,55 @@ function cards(groups,kind){
     const st=!it?'':kind==='swords'?'Damage '+abbr(it.dmg*sc(o)):kind==='shields'?(it.dm?'Dmg multi x'+(+(it.dm*sc(o)).toFixed(2)):'Protection '+abbr(it.prot*sc(o))):'Gold x'+it.gold+' · Power x'+it.pow;
     return `<div class="it${eq?' eq':''}" style="--rc:${rc}"><div class="top"><span>${it?it.r.toUpperCase():'UNKNOWN'}</span>${gear?`<span class="lv">LV ${o.level}</span>`:''}</div><div class="nm">${esc(it?it.n:'Item #'+o.type)}</div><div class="st">${esc(st)}</div>${gear?`<div class="sls">${slots(o,kind)}</div>`:''}${MAP&&!it?`<select class="mp" data-k="${kind}" data-t="${o.type}"><option value="">Name this item</option>${CATS[kind].map(x=>`<option>${esc(x.n)}</option>`).join('')}</select>`:''}${eq?'<span class="eqt">EQUIPPED</span>':''}${n>1?`<span class="x">x${n}</span>`:''}</div>`;}).join('')}</div>`;
 }
+const WORLDS=[['Orkland',0,2],['Sugarland',3,5],['Iceworld',6,6],['Desertland',7,9],['Netherworld',10,12],['Heaven',13,13],['Aqualand',14,16],['Spaceland',17,19],['Dragon World',20,21],['Death World',22,22],['Asgard',23,25],['Godyard',26,28]];
+const BOSS=new Set([6,13,21,22,25,28]);
+function combat(km){
+  const ids=Object.keys(km).map(Number),get=i=>+km[i]||0;
+  if(!ids.length)return '<div class="card" style="margin-top:14px"><h3>Combat record</h3><p class="empty">No kill data available.</p></div>';
+  const total=ids.reduce((t,i)=>t+get(i),0),boss=[...BOSS].reduce((t,i)=>t+get(i),0),top=[...ids].sort((a,b)=>get(b)-get(a))[0];
+  const sum=[['TOTAL KILLS',abbr(total),full(total)],['BOSS KILLS',abbr(boss),full(boss)],['MOST KILLED',(ENEMY_NAMES[top]||'Enemy '+top)+' · '+get(top).toLocaleString(),'']];
+  const worlds=WORLDS.map(([w,a,b])=>{const r=[];for(let i=a;i<=b;i++)r.push(i);const mx=Math.max(1,...r.map(get));
+    return `<div class="wc"><h5>${w}</h5>${r.map(i=>`<div class="er${BOSS.has(i)?' boss':''}${get(i)?'':' z'}"><span>${esc(ENEMY_NAMES[i]||'Enemy '+i)}${BOSS.has(i)?'<em>BOSS</em>':''}</span><b>${get(i).toLocaleString()}</b><i style="width:${get(i)/mx*100}%"></i></div>`).join('')}</div>`;}).join('');
+  return `<div class="card" style="margin-top:14px"><h3>Combat record</h3><div class="mini" style="margin:0 0 4px">${sum.map(([l,v,t])=>`<div><small>${l}</small><b title="${esc(t)}">${esc(v)}</b></div>`).join('')}</div><div class="ws">${worlds}</div></div>`;
+}
+const uniq=l=>{const m=new Map();(l||[]).forEach(o=>m.set(o.type+'|'+o.level+'|'+JSON.stringify(o.enchantments||[]),o));return [...m.values()];};
+function bestSetup(inv){
+  const S=uniq(inv.swords).filter(o=>byId('swords',o.type)),H=uniq(inv.shields).filter(o=>byId('shields',o.type)),res=[];
+  S.forEach(a=>H.forEach(b=>{const c=calc(inv,a,b);if(c.dps)res.push([c,a,b]);}));
+  if(!res.length)return '';
+  res.sort((x,y)=>y[0].dps-x[0].dps);
+  const cur=calc(inv).dps||0,nm=(o,k)=>byId(k,o.type).n+' Lv '+o.level;
+  const top=res.slice(0,3).map(([c,a,b],i)=>[`${i+1}. ${nm(a,'swords')} + ${nm(b,'shields')}`,abbr(c.dps)+' DPS',full(c.dps)]);
+  const gain=cur?(res[0][0].dps/cur-1)*100:0;
+  top.push(['Your current setup',cur?abbr(cur)+' DPS':'—',cur?full(cur):'']);
+  return `<div class="card" style="margin-top:14px"><h3>Best setup</h3>${rows(top)}<p class="note">${gain>0.05?`Switching to the top pair raises DPS by ${gain.toFixed(1)}%.`:'Your equipped pair is already the best among the items you own.'}</p></div>`;
+}
+const BOSSES=[['Mordolith',5e14,6.15],['The Rival',1e14,6.15],['Reaper',3e12,6.15],['Dragon',1e11,11.15]],LOOT=[1,1.6,2.2,2.8,3.4,4,4];
+function bossCard(inv){
+  const c=calc(inv);if(!c.dmg)return '';
+  const dn=c.dmg*c.hits,F=c.flame||0,pm=+inv.powerMultiplier||1,lv=o=>((o&&o.enchantments||[]).find(e=>e.type===2)||{level:0}).level;
+  const lm=LOOT[Math.min(6,lv(inv.activeSword)+lv(inv.activeShield))];
+  const r=BOSSES.map(([n,hp,dt])=>{let lo=0,hi=hp/dn+2;const f=t=>dn*t+F*Math.max(0,Math.floor(t)-1)-hp;
+    for(let i=0;i<70;i++){const m=(lo+hi)/2;if(f(m)>=0)hi=m;else lo=m;}
+    const k=86400/(hi+dt);
+    return `<tr><td>${n}</td><td>${hi<10?hi.toFixed(2):hi.toFixed(1)}s</td><td>${Math.round(k).toLocaleString()}</td><td>${abbr(k*hp*pm)}</td><td>${(k*.01*lm).toFixed(1)}</td></tr>`;}).join('');
+  return `<div class="card" style="margin-top:14px"><h3>Boss farming</h3><div class="tbl" style="max-height:none"><table><tr><th>Boss</th><th>Kill time</th><th>Kills / day</th><th>Power / day</th><th>Epic sword and shield drops / day</th></tr>${r}</table></div><p class="note">Solo, farming nonstop, with Looting x${lm}. Epic drop chance is 1% per kill before Looting.</p></div>`;
+}
 let LAST=null;
 function render(inv,name){
   LAST=[inv,name];
   const c=calc(inv),L=+inv.level||0,xp=+inv.experience||0;
-  const prog=Math.max(0,Math.min(1,(xp-Math.pow(L,4))/(Math.pow(L+1,4)-Math.pow(L,4))));
   const kills=Object.entries(inv.killedEnemyTypes||{}).map(([k,v])=>[k,+v||0]).sort((a,b)=>+a[0]-+b[0]);
   const total=kills.reduce((t,[,v])=>t+v,0),max=Math.max(1,...kills.map(k=>k[1]));
-  const mini=[['GOLD MULTI',inv.goldMultiplier!==undefined?'x'+inv.goldMultiplier:'—'],['POWER MULTI',inv.powerMultiplier!==undefined?'x'+inv.powerMultiplier:'—'],['HIT SPEED',c.hits.toFixed(2)+'/s'],['DPS',c.dps?abbr(c.dps):'—'],['TOTAL KILLS',abbr(total)]];
+  const mini=[['GOLD MULTI',inv.goldMultiplier!==undefined?'x'+inv.goldMultiplier:'—'],['POWER MULTI',inv.powerMultiplier!==undefined?'x'+inv.powerMultiplier:'—'],['HIT SPEED',c.hits.toFixed(2)+'/s'],['DPS',c.dps?abbr(c.dps):'—']];
   $('out').innerHTML=`<div class="who"><h2>${esc(name||'Player')}</h2></div>
-  <div class="hero">${tile('⚡ POWER',abbr(inv.power),full(inv.power),'var(--blue)')}${tile('🪙 GOLD',abbr(inv.gold),full(inv.gold),'var(--gold)')}${tile('⭐ LEVEL',L.toLocaleString(),'','#3dffa0',`<div class="bar" title="${(prog*100).toFixed(1)}% to next level"><i style="width:${(prog*100).toFixed(1)}%"></i></div>`)}${tile('⚔️ DAMAGE',c.dmg?abbr(c.dmg):'—',c.dmg?full(c.dmg):'','#ff7a3d')}${tile('❤️ MAX HEALTH',abbr(inv.maxHealth),full(inv.maxHealth),'var(--bad)')}</div>
+  <div class="hero">${tile('POWER',abbr(inv.power),full(inv.power),'var(--blue)')}${tile('GOLD',abbr(inv.gold),full(inv.gold),'var(--gold)')}${tile('LEVEL',L.toLocaleString(),'','#3dffa0')}${tile('DAMAGE',c.dmg?abbr(c.dmg):'—',c.dmg?full(c.dmg):'','#ff7a3d')}${tile('MAX HEALTH',abbr(inv.maxHealth),full(inv.maxHealth),'var(--bad)')}</div>
   <div class="mini">${mini.map(([l,v])=>`<div><small>${l}</small><b>${esc(v)}</b></div>`).join('')}</div>
   <div class="card" style="margin-top:14px"><h3>Inventory</h3>
    <h4>SWORDS</h4>${cards(stacks(inv.swords,inv.activeSword&&inv.activeSword.itemId,'swords'),'swords')}
    <h4>SHIELDS</h4>${cards(stacks(inv.shields,inv.activeShield&&inv.activeShield.itemId,'shields'),'shields')}
    <h4>PETS</h4>${cards(stacks(inv.pets,(inv.activePets||[]).map(p=>p.itemId),'pets'),'pets')}</div>
-  <div class="card" style="margin-top:14px"><h3>Combat record</h3>
-   ${kills.length?`<div class="kv"><span>Total kills</span><b title="${full(total)}">${abbr(total)}</b></div><div class="kills">${kills.map(([k,v])=>`<div class="kr"><span>${esc(ENEMY_NAMES[k]||'Enemy '+k)}</span><i style="width:${Math.max(2,v/max*100)}%"></i><b>${v.toLocaleString()}</b></div>`).join('')}</div>`:'<p class="empty">No kill data available.</p>'}</div>
+  ${bestSetup(inv)}${bossCard(inv)}${combat(inv.killedEnemyTypes||{})}
   ${MAP?`<div style="margin-top:14px"><button class="go" id="cm" style="padding:12px 18px">COPY MAPPING JSON</button><details><summary>Raw response</summary><pre>${esc(JSON.stringify(inv,null,2))}</pre></details></div>`:''}`;
 }
 $('out').addEventListener('change',e=>{const t=e.target;if(!t.classList||!t.classList.contains('mp')||!t.value)return;const k=t.dataset.k;saved[k]=saved[k]||{};saved[k][t.dataset.t]=t.value;store.set('idmap',saved);IDMAP[k][t.dataset.t]=t.value;if(LAST)render(LAST[0],LAST[1]);});
@@ -482,7 +546,8 @@ const STAFF=[
  {role:'Admins',label:'Admin',c:'var(--bad)',people:['JensJ56','burakersin','PRO9','Nice Face']},
  {role:'Moderators',label:'Moderator',c:'#3dffa0',people:['saltbrgr','harmony','Triple','rin','ōttaM']}
 ];
-$('staff').innerHTML='<h2 class="sh">Meet our Staff Team</h2><p class="ssub">The people who keep the community running.</p>'+STAFF.map(g=>`<h3 style="color:${g.c};margin:26px 0 12px;text-align:center">${g.role.toUpperCase()}</h3><div class="sg">${g.people.map(p=>`<div class="sc${g.big?' big':''}" style="--c:${g.c}"><div class="av">${esc([...p][0].toUpperCase())}</div><b>${esc(p)}</b><small>${g.label.toUpperCase()}</small></div>`).join('')}</div>`).join('');
+const PFP={Emre:'staff/emre.jpg',Ersin:'staff/ersin.jpg',Hasanklnc:'staff/hasanklnc.jpg',JustMelih:'staff/justmelih.jpg',cuvan:'staff/cuvan.jpg',JensJ56:'staff/jensj56.jpg',burakersin:'staff/burakersin.jpg',PRO9:'staff/pro9.jpg','Nice Face':'staff/niceface.jpg',saltbrgr:'staff/saltbrgr.jpg',harmony:'staff/harmony.jpg',Triple:'staff/triple.jpg',rin:'staff/rin.jpg','ōttaM':'staff/ottam.jpg'};
+$('staff').innerHTML='<h2 class="sh">Meet our Staff Team</h2><p class="ssub">The people who keep the community running.</p>'+STAFF.map(g=>`<h3 style="color:${g.c};margin:26px 0 12px">${g.role.toUpperCase()}</h3><div class="sg">${g.people.map(p=>`<div class="sc${g.big?' big':''}" style="--c:${g.c}"><div class="av">${PFP[p]?`<img src="${esc(PFP[p])}" alt="${esc(p)}">`:esc([...p][0].toUpperCase())}</div><div><b>${esc(p)}</b><small>${g.label.toUpperCase()}</small></div></div>`).join('')}</div>`).join('');
 
 /* ---------- upgrade lab ---------- */
 const EN=[['Flame','Sword',[40,35,18,7],[15,45,25,15]],['Thorns','Shield',[50,35,12,3],[20,45,25,10]],['Looting','Sword & shield',[60,30,8,2],[25,42.5,22.5,10]],['Freeze','Sword',[65,27.5,6,1.5],[30,50,15,5]],['Fortune','Shield',[70,25,4,1],[50,40,7.5,2.5]]];
@@ -499,6 +564,150 @@ function paintLab(){
   $('mo').innerHTML=rows([['Items needed',g+' × Level '+(g-1)],['Total Level 1 items',f.toLocaleString()]]);
 }
 ['lvl','ft','pp','pl','mg'].forEach(i=>{$(i).oninput=paintLab;$(i).onchange=paintLab;});paintLab();
+
+/* ---------- game info ---------- */
+const AR=(slot,t)=>t.trim().split('\n').map(l=>{const p=l.split('|');return {s:slot,n:p[0],b:+p[1],pw:+p[2]||0,hp:+p[3]||0,hm:+p[4]||0,g:+p[5]||0};});
+const ARMOR=[...AR('Helmet',`Eternal Helmet|2e15|6|75e6|11|5
+Mourner's Helmet|1e15|5|50e6|10|4
+Graveborn Helmet|750e12|4.5|40e6|9.5|3.5
+Solarflare Helmet|500e12|4|30e6|9|3
+Stormborn Helmet|100e12|3.5|20e6|8|2.5
+Death's Helmet|15e12|3|15e6|7.5|2
+Cosmic Helmet|500e9|2.5|10e6|6.5|1.5
+Nova Helmet|100e9|2|9e6|6|1
+Starfire Helmet|50e9|1.5|9.5e6|5.5|1.25
+Sea Guardian's Helmet|30e9|1.5|8.5e6|5|1
+Hydrostone Helmet|25e9|1.25|7.5e6|4.5|1
+Nether Helmet|4e9|1.25|3e6|3|1
+Seashell Helmet|15e9|1|6e6|4|1
+Hellfire Headguard|15e9|1|4.5e6|3.5|1
+Obsidian Helmet|700e6|1|1.5e6|2.75|1
+Immortal Helmet|400e6|1|800e3|2.5|1
+Chocohead|100e3|1|20e3|1|0
+Bone Helmet|100e6|.75|400e3|2|.75
+Cactus Helmet|20e6|.75|100e3|1.75|.75
+Lollipop Helmet|1e6|.75|50e3|1.25|.75
+Sweetmallow|50e3|.5|5e3|.5|.5
+King's Crown|100e3|.25|1e3|.75|.5
+Iron Helmet|10e3|0|400|0|.25
+Leather Bandana|500|0|100|0|0`),...AR('Chestplate',`Eternal Chestplate|20e15|5|2.5e9|10|5
+Mourner's Chestplate|10e15|4|1e9|9|4
+Graveborn Chestplate|7.5e15|3.5|750e6|8.5|3.5
+Solarflare Chestplate|5e15|3|500e6|8|3
+Stormborn Chestplate|1e15|2.5|150e6|7|2.5
+Death's Chestplate|100e12|2|45e6|6.5|2
+Obsidian Chestplate|850e6|1.25|1.6e6|2.5|1
+Immortal Chestplate|500e6|1.25|1e6|2.5|1
+Boneshell|150e6|1.25|500e3|2.25|1
+Cosmic Chestplate|500e9|1|15e6|5.5|1.5
+Nova Chestplate|250e9|1|12e6|5|1.25
+Starfire Chestplate|50e9|1|9.5e6|4.5|1
+Sea Guardian's Chestplate|50e9|1|8.5e6|4|1
+Hydrostone Chestplate|30e9|1|7e6|3.5|1
+Seashell Chestplate|20e9|1|6e6|3.25|1.75
+Hellfire Chestplate|20e9|1|5e6|3|1.5
+Nether Chestplate|4.5e9|1|3.2e6|2.75|1
+Spiked Shell|25e6|1|150e3|2|1
+Candyshell|250e3|1|40e3|1.5|1
+Chocoblock|125e3|1|14e3|1.25|.25
+Fluffymellow|75e3|.75|4e3|.75|.75
+Golden Chestplate|50e3|.25|1.2e3|.25|.5
+Iron Chestplate|15e3|0|600|0|.25
+Leather Chestplate|1e3|0|200|0|0`),...AR('Pants',`Eternal Short|2.5e15|6|2e9|10|5
+Mourner's Short|1.5e15|5.25|1e9|8.5|4.25
+Graveborn Short|1e15|4.75|750e6|8|3.75
+Solarflare Short|500e12|4|500e6|7.5|3
+Stormborn Short|100e12|3.5|100e6|6.75|2.5
+Death's Short|20e12|3|15e6|6|2
+Cosmic Short|300e9|2.75|10e6|5.25|1.75
+Nova Short|120e9|2.25|8.5e6|4.75|1.5
+Starfire Short|60e9|1.75|7.5e6|4.25|1
+Sea Guardian's Short|40e9|1.5|6.5e6|3.75|1
+Hydrostone Short|30e9|1.25|6e6|3.5|1
+Nether Short|4.5e9|1.25|3.2e6|2.75|1
+Immortal Short|500e6|1.25|1e6|2.5|1
+Seashell Short|20e9|1.25|5.5e6|3.25|1
+Hellfire Short|20e9|1|5e6|3|1
+Obsidian Short|850e6|1|1.6e6|2.75|1
+Bone Short|150e6|1|500e3|2|1
+Cactus Short|25e6|1|100e3|1.75|1
+Lollishort|250e3|1|60e3|1.5|1
+Chocoshort|120e3|1|25e3|1.25|.25
+Softmallow Short|75e3|.75|6e3|.75|.75
+Golden Short|40e3|.25|1.2e3|.25|.5
+Iron Short|15e3|.25|600|0|.25
+Leather Short|1e3|0|200|0|0`),...AR('Boots',`Eternal Boots|1e15|5|600e6|8|5
+Mourner's Boots|500e12|4|400e6|7|4
+Graveborn Boots|350e12|3.5|300e6|6.5|3.5
+Solarflare Boots|250e12|3|200e6|6|3
+Stormborn Boots|50e12|2.5|100e6|5.5|2.5
+Death's Boots|10e12|2|20e6|5|2
+Cosmic Boots|500e9|1.5|12e6|4.5|1.5
+Nova Boots|200e9|1.25|10e6|4.25|1.25
+Starfire Boots|40e9|1.25|9e6|3.75|1
+Sea Guardian's Boots|25e9|1|8e6|3.5|1
+Hydrostone Boots|20e9|1|6.5e6|3|1
+Seashell Boots|15e9|1|5.5e6|2.75|1
+Hellfire Boots|15e9|1|4.5e6|2.5|1
+Nether Boots|4e9|1|2e6|2.5|1
+Obsidian Boots|700e6|1|1e6|2.25|1
+Immortal Boots|400e6|1|400e3|2|1.25
+Bone Boots|100e6|1|250e3|1.5|1
+Cactus Boots|20e6|1|70e3|1.25|1
+Candy Boots|200e3|1|20e3|1|.75
+Cake Boots|100e3|.75|10e3|.75|.25
+Soft Boots|50e3|.5|3e3|.25|.5
+Golden Boots|30e3|.25|500|0|.25
+Iron Boots|10e3|0|250|0|.25
+Leather Shoes|500|0|100|0|0`)];
+const EDMG=[10,500,2e3,5e3,15e3,30e3,25e3,50e3,2e5,5e5,2e6,5e6,3e6,10e6,10e6,20e6,30e6,50e6,100e6,150e6,50e6,100e6,2e9,800e6,3.5e9,10e9,6e9,15e9,35e9];
+const ERESP=[3,5,10,5,10,10,10,5,10,10,5,7,10,10,5,5,5,5,5,5,5,10,5,5,5,5,5,5,5];
+const ORES=[['Coal','Flame','Sword',5e11,'65.6%',1e11,70],['Emerald','Thorns','Shield',2.5e12,'19.7%',2e11,55],['Diamond','Looting','Sword & shield',1e13,'9.8%',3e11,40],['Ruby','Freeze','Sword',1e13,'3.3%',4e11,25],['Gold','Fortune','Shield',2.5e13,'1.6%',5e11,20]];
+const nz=v=>v?abbr(v):'—',xz=v=>v?'x'+v:'—';
+function paintInfo(){
+  const k=$('gk').value,q=$('gq').value.toLowerCase().trim();
+  const T=(h,r)=>`<table><tr>${h.map(x=>`<th>${x}</th>`).join('')}</tr>${r.map(x=>`<tr>${x.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')||'<tr><td>No matches</td></tr>'}</table>`;
+  let h='';
+  if(k==='armor')h=T(['Name','Slot','Power','Extra HP','Health','Gold','Buy price'],ARMOR.filter(a=>!q||(a.n+' '+a.s).toLowerCase().includes(q)).map(a=>[esc(a.n),a.s,xz(a.pw),nz(a.hp),xz(a.hm),xz(a.g),abbr(a.b)]));
+  else if(k==='enemies')h=T(['Enemy','World','Health','Damage','Respawn'],ENEMIES.map((e,i)=>{const w=WORLDS.find(x=>i>=x[1]&&i<=x[2]);return [esc(e.n)+(BOSS.has(i)?' <em class="bt">BOSS</em>':''),w?w[0]:'',abbr(e.hp),abbr(EDMG[i]),ERESP[i]+'s'];}).filter(r=>!q||(r[0]+' '+r[1]).toLowerCase().includes(q)));
+  else h=T(['Ore','Enchant','Works on','Block HP','Spawn chance','Sell (raw)','Smelt chance','Free smelt'],ORES.filter(o=>!q||o.join(' ').toLowerCase().includes(q)).map(o=>[o[0],o[1],o[2],abbr(o[3]),o[4],abbr(o[5]),o[6]+'%',Math.floor(o[6]/2)+'%']));
+  $('gt').innerHTML=h;
+}
+$('gk').onchange=paintInfo;$('gq').oninput=paintInfo;paintInfo();
+
+/* ---------- damage calculator ---------- */
+const SUFN={K:1e3,M:1e6,B:1e9,T:1e12,QT:1e15,QNT:1e18,SXT:1e21};
+const parseNum=t=>{const m=String(t).trim().match(/^([\d.]+(?:e[+-]?\d+)?)\s*([a-z]*)$/i);return m?+m[1]*(m[2]?(SUFN[m[2].toUpperCase()]||NaN):1):NaN;};
+$('ws').innerHTML=SWORDS.map((o,i)=>`<option value="${i}">${esc(o.n)}</option>`).join('');$('ws').value=SWORDS.length-1;
+$('wh').innerHTML=SHIELDS.map((o,i)=>`<option value="${i}">${esc(o.n)}</option>`).join('');$('wh').value=SHIELDS.length-1;
+function paintWi(){
+  const P=parseNum($('wp').value),L=+$('wl').value,s=SWORDS[+$('ws').value],h=SHIELDS[+$('wh').value];
+  if(!(P>=0)||!s||!h){$('wo').innerHTML='<p class="empty">Enter a valid power value, like 1.02SXT.</p>';return;}
+  const so={level:+$('wsl').value||1},ho={level:+$('whl').value||1},F=+$('wf').value||0;
+  const DS=s.dmg*sc(so),MS=h.dm*sc(ho),r=Math.sqrt(P),dmg=(DS+2*r+1)*(1+MS),hits=1+.5*Math.pow(L,1/8),fl=F?(2*r+DS)/(10-F)*(1+MS):0;
+  $('wo').innerHTML=rows([['Damage per hit',abbr(dmg),full(dmg)],['Hit speed',hits.toFixed(2)+'/s'],['Flame tick',F?abbr(fl):'—'],['DPS',abbr(dmg*hits+fl),full(dmg*hits+fl)]]);
+}
+['wp','wl','ws','wsl','wf','wh','whl'].forEach(i=>{$(i).oninput=paintWi;$(i).onchange=paintWi;});
+$('wload').onclick=()=>{if(!LAST)return;const inv=LAST[0],aS=inv.activeSword,aH=inv.activeShield,si=aS&&byId('swords',aS.type),hi=aH&&byId('shields',aH.type);
+  $('wp').value=inv.power;$('wl').value=inv.level;
+  if(si){$('ws').value=SWORDS.indexOf(si);$('wsl').value=aS.level;const f=(aS.enchantments||[]).find(e=>e.type===0);$('wf').value=f?f.level:0;}
+  if(hi){$('wh').value=SHIELDS.indexOf(hi);$('whl').value=aH.level;}paintWi();};
+paintWi();
+
+/* ---------- clan tools ---------- */
+const CM=[0,10,25],dur=s=>{const d=Math.floor(s/86400),h=Math.floor(s%86400/3600),m=Math.floor(s%3600/60);return [d&&d+'d',h&&h+'h',m&&m+'m',(d||h||m)?'':s+'s'].filter(Boolean).join(' ');};
+function paintClan(){
+  const lv=[0,1,2,3,4].map(i=>+$('cc'+i).value||0),cap=10+lv.reduce((t,l)=>t+CM[l],0);
+  const step=(l,i)=>1e16*(l+1)*(i===0?100:1),names=['Castle','Tent 1','Tent 2','Tent 3','Tent 4'];
+  let total=0;const next=[];
+  lv.forEach((l,i)=>{for(let x=l;x<2;x++)total+=step(x,i);if(l<2)next.push([names[i]+' upgrade',abbr(step(l,i))+' gold']);});
+  $('co').innerHTML=rows([['Max members',cap],...next,['Cost to max everything',total?abbr(total)+' gold':'—']]);
+  const base=parseNum($('cg').value),il=Math.max(1,+$('cl').value||1);
+  if(!(base>=0)){$('cf').innerHTML='<p class="empty">Enter a valid value, like 500M.</p>';return;}
+  const G=Math.min(1e13,Math.max(100,base*Math.pow(2,il-1))),x=(G-100)/(1e13-100),sec=Math.round(60+7775940*Math.pow(x,.6));
+  $('cf').innerHTML=rows([['Time added',dur(sec)],['Seconds',sec.toLocaleString()]]);
+}
+['cc0','cc1','cc2','cc3','cc4','cg','cl'].forEach(i=>{$(i).oninput=paintClan;$(i).onchange=paintClan;});paintClan();
 
 /* ---------- tools ---------- */
 const REFERENCE={
