@@ -72,8 +72,7 @@ h4{margin:16px 0 8px;font:600 11px Orbitron;color:var(--mute);letter-spacing:.15
 </head>
 <body>
 <main>
-<div class="brand"><svg width="46" height="46" viewBox="0 0 48 48" aria-hidden="true"><path d="M24 3 42 10v14c0 11-8 18-18 21C14 42 6 35 6 24V10z" fill="#151927" stroke="#ffc83d" stroke-width="2"/><path d="M24 11v22M18 29h12M24 11l-3 5h6z" stroke="#38b6ff" stroke-width="2.5" stroke-linecap="round" fill="none"/></svg>
-<div><h1>SWORDMASTERS <span>COMPANION HUB</span></h1><div class="comm hidden" id="comm"></div></div></div>
+<div class="brand"><div><h1>SWORDMASTERS <span>COMPANION HUB</span></h1><div class="comm hidden" id="comm"></div></div></div>
 <nav role="tablist">
   <button role="tab" aria-selected="true" data-tab="search">Player lookup</button>
   <button role="tab" aria-selected="false" data-tab="compare">Compare players</button>
@@ -276,7 +275,7 @@ Ponyo|C|4.25|4.75|0
 Chandy|R|4.5|5|0
 Runix|E|12.5|13.5|1.2`,PET_K);
 const ENEMY_NAMES='Roundhead,Forest Orc,Bonechewer,Cocoa Guardian,Chocolate Knight,Mallowbeast,Ice King,Spiked Tortoise,Cursed Stone,Mummy,Giant Moai,Lava Rock,Nether Lord,Zeus,Crokora,Hydrino,Temple Guardian,Bouugo,Anaxion,Xenomor,Dragon Guardian,Dragon,Reaper,Thrones,Seraphim,The Rival,Wargmaw,Lornblade,Mordolith'.split(',');
-const ENCHANT_NAMES={}; // e.g. {0:'Looting', 1:'Thorns'}
+const ENCHANT_NAMES={0:'Flame',1:'Thorns',2:'Loot',3:'Freeze',4:'Fortune'}; // 0 and 1 confirmed from screenshot; 2-4 assumed from list order
 
 const SUF=['','K','M','B','T','Qa','Qi','Sx','Sp','Oc','No','Dc'];
 const abbr=n=>{if(typeof n!=='number'||!isFinite(n))return '—';if(Math.abs(n)<1000)return n.toLocaleString(undefined,{maximumFractionDigits:2});
@@ -407,7 +406,7 @@ $('dm').onchange=paintDrops;$('dq').oninput=paintDrops;paintDrops();
 /* ---------- tools (edit these values after verifying in-game) ---------- */
 const REFERENCE={
   stats:[['Active pet cap','3 (seen in player data)'],['Weapon level scaling','Not confirmed yet']],
-  enchants:[['S','Looting, Flame','Best for farming speed and damage'],['A','Thorns','Situational: defensive'],['B','Other enchants','Fill remaining slots']]
+  enchants:[['S','Loot, Flame','Best for farming speed and damage'],['A','Thorns','Situational: defensive'],['B','Other enchants','Fill remaining slots']]
 };
 $('ref').innerHTML=rows(REFERENCE.stats);
 $('ench').innerHTML='<tr><th>Tier</th><th>Enchants</th><th>Why</th></tr>'+REFERENCE.enchants.map(r=>`<tr>${r.map(c=>`<td>${esc(c)}</td>`).join('')}</tr>`).join('');
