@@ -105,7 +105,7 @@ h4{margin:16px 0 8px;font:600 11px Orbitron;color:var(--mute);letter-spacing:.15
       <p class="note">These numbers live in the <code>REFERENCE</code> object in this file. They are unverified starting values: confirm them in-game, then edit.</p>
     </div>
     <div class="card">
-      <h3>Enchantment priority</h3>
+      <h3>Enchantment priority <span class="tag">unverified tiers</span></h3>
       <table id="ench"></table>
     </div>
     <div class="card">
@@ -275,9 +275,9 @@ Ponyo|C|4.25|4.75|0
 Chandy|R|4.5|5|0
 Runix|E|12.5|13.5|1.2`,PET_K);
 const ENEMY_NAMES='Roundhead,Forest Orc,Bonechewer,Cocoa Guardian,Chocolate Knight,Mallowbeast,Ice King,Spiked Tortoise,Cursed Stone,Mummy,Giant Moai,Lava Rock,Nether Lord,Zeus,Crokora,Hydrino,Temple Guardian,Bouugo,Anaxion,Xenomor,Dragon Guardian,Dragon,Reaper,Thrones,Seraphim,The Rival,Wargmaw,Lornblade,Mordolith'.split(',');
-const ENCHANT_NAMES={0:'Flame',1:'Thorns',2:'Loot',3:'Freeze',4:'Fortune'}; // 0 and 1 confirmed from screenshot; 2-4 assumed from list order
+const ENCHANT_NAMES={0:'Flame',1:'Thorns',2:'Looting',3:'Freeze',4:'Fortune'}; // 0 and 1 confirmed from screenshot; 2-4 assumed from list order
 
-const SUF=['','K','M','B','T','Qa','Qi','Sx','Sp','Oc','No','Dc'];
+const SUF=['','K','M','B','T','QT','QNT','SXT','SPT','OCT','NON','DEC'];
 const abbr=n=>{if(typeof n!=='number'||!isFinite(n))return '—';if(Math.abs(n)<1000)return n.toLocaleString(undefined,{maximumFractionDigits:2});
   const i=Math.min(Math.floor(Math.log10(Math.abs(n))/3),SUF.length-1);return (n/Math.pow(10,3*i)).toFixed(2).replace(/\.?0+$/,'')+SUF[i];};
 const full=n=>typeof n==='number'&&isFinite(n)?n.toLocaleString('en-US',{useGrouping:true,maximumFractionDigits:0}):'';
@@ -305,8 +305,8 @@ function render(inv,name){
   const sw=gr(aS,sI,SW_K),sh=gr(aH,hI,SH_K);
   const sum=k=>+pI.reduce((t,p)=>t+p[k],0).toFixed(2);
   const bonus=pets.length&&pI.every(Boolean)?`Gold x${sum('gold')} · Power x${sum('pow')}`:undefined;
-  const kills=Object.entries(inv.killedEnemyTypes||{}).map(([k,v])=>[k,+v||0]).sort((a,b)=>b[1]-a[1]);
-  const total=kills.reduce((t,[,v])=>t+v,0),max=kills.length?kills[0][1]:1;
+  const kills=Object.entries(inv.killedEnemyTypes||{}).map(([k,v])=>[k,+v||0]).sort((a,b)=>+a[0]-+b[0]);
+  const total=kills.reduce((t,[,v])=>t+v,0),max=Math.max(1,...kills.map(k=>k[1]));
   const act=(a)=>(a?[a.itemId]:[]);
   $('out').innerHTML=`<div class="who"><h2>${esc(name||'Player')}</h2></div>
   <div class="hero">${tile('POWER',abbr(inv.power),full(inv.power),'var(--blue)')}${tile('GOLD',abbr(inv.gold),full(inv.gold),'var(--gold)')}${tile('LEVEL',fmt(inv.level),'','#3dffa0')}${tile('MAX HEALTH',abbr(inv.maxHealth),full(inv.maxHealth),'var(--bad)')}</div>
@@ -405,7 +405,7 @@ $('dm').onchange=paintDrops;$('dq').oninput=paintDrops;paintDrops();
 
 /* ---------- tools (edit these values after verifying in-game) ---------- */
 const REFERENCE={
-  stats:[['Active pet cap','3 (seen in player data)'],['Weapon level scaling','Not confirmed yet']],
+  stats:[['Active pet cap','3 (seen in player data)'],['Weapon level scaling','Not confirmed yet'],['Enchants','Flame, Thorns, Looting, Freeze, Fortune']],
   enchants:[['S','Loot, Flame','Best for farming speed and damage'],['A','Thorns','Situational: defensive'],['B','Other enchants','Fill remaining slots']]
 };
 $('ref').innerHTML=rows(REFERENCE.stats);
