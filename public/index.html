@@ -40,6 +40,12 @@ label.tg{display:flex;gap:10px;align-items:flex-start;padding:8px 0;cursor:point
 label.tg small{display:block;color:var(--mute)}
 details{margin-top:18px}summary{cursor:pointer;color:var(--mute)}
 pre{background:#0a0c13;border:1px solid var(--line);border-radius:8px;padding:14px;overflow:auto;max-height:360px;font-size:12.5px}
+.kills{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:4px 22px;margin-top:8px}
+.kr{display:grid;grid-template-columns:90px 1fr 64px;gap:10px;align-items:center;font-size:13px}
+.kr span{color:var(--mute)}.kr b{text-align:right;font-weight:600}.kr i{height:6px;border-radius:3px;background:linear-gradient(90deg,var(--blue),var(--gold));display:block}
+select{flex:1;min-width:0;background:#0a0c13;border:1px solid var(--line);border-radius:8px;color:var(--text);font:500 14px Inter;padding:12px}
+select{background:#0a0c13;border:1px solid var(--line);border-radius:8px;color:var(--text);font:500 15px Inter;padding:0 14px}
+.tbl{overflow:auto;max-height:420px;margin-top:10px;font-size:13px}
 .hidden{display:none}
 .check{display:flex;gap:8px;align-items:center;padding:5px 0}
 @media(max-width:520px){.search{flex-direction:column}.go{padding:14px}}
@@ -66,7 +72,7 @@ pre{background:#0a0c13;border:1px solid var(--line);border-radius:8px;padding:14
 <section id="tools" class="hidden">
   <div class="grid">
     <div class="card gold">
-      <h3>Stat growth reference <span class="tag">edit &amp; verify in-game</span></h3>
+      <h3>Quick reference <span class="tag">edit &amp; verify</span></h3>
       <div id="ref"></div>
       <p class="note">These numbers live in the <code>REFERENCE</code> object in this file. They are unverified starting values: confirm them in-game, then edit.</p>
     </div>
@@ -78,6 +84,15 @@ pre{background:#0a0c13;border:1px solid var(--line);border-radius:8px;padding:14
       <h3>Hub Idea Enhancer</h3>
       <div id="flags"></div>
       <p class="note">Toggles are saved in this browser only.</p>
+    </div>
+    <div class="card hidden" id="compare" style="grid-column:1/-1"><h3>Item comparison</h3>
+      <div class="search"><select id="cc" aria-label="Category"></select><select id="ca" aria-label="First item"></select><select id="cb" aria-label="Second item"></select></div>
+      <div id="cres" style="margin-top:12px"></div><p class="note">Base stats from the wiki. Upgrade levels and enchantments are not included.</p></div>
+    <div class="card" style="grid-column:1/-1">
+      <h3>Item database <span class="tag">from wiki</span></h3>
+      <div class="search"><select id="dbk" aria-label="Category"><option value="swords">Swords</option><option value="shields">Shields</option><option value="pets">Pets</option></select>
+      <input id="dbq" type="text" placeholder="Filter by name or # (type number)" aria-label="Filter"></div>
+      <div class="tbl" id="dbt"></div>
     </div>
     <div class="card hidden" id="guild">
       <h3>Guild checklist</h3>
@@ -104,28 +119,175 @@ document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
 });
 
 /* ---------- lookup ---------- */
-const pick=(o,keys)=>{if(!o||typeof o!=='object')return undefined;for(const k of keys)if(o[k]!==undefined&&o[k]!==null)return o[k];};
-const fmt=v=>v===undefined||v===null?'—':typeof v==='number'?v.toLocaleString():typeof v==='object'?JSON.stringify(v):String(v);
-const rows=list=>list.map(([k,v])=>`<div class="kv"><span>${esc(k)}</span><b>${esc(fmt(v))}</b></div>`).join('');
-const item=o=>{if(o===undefined||o===null)return {id:undefined,lvl:undefined};if(typeof o!=='object')return {id:o,lvl:undefined};return {id:pick(o,['id','itemId','item','type']),lvl:pick(o,['level','lvl','lv'])};};
-const count=v=>Array.isArray(v)?v.length:v&&typeof v==='object'?Object.keys(v).length:v;
+/* Optional: fill in real names once you know them (id -> name). Unknown ids show as "Type N". */
+const RAR={C:'Common',R:'Rare',E:'Epic',L:'Legendary'};
+const LBL={dmg:'Damage power',prot:'Damage protection',hp:'Health multi',gold:'Gold multi',dm:'Damage multi',pow:'Power multi',spd:'Speed multi'};
+const BIG=['dmg','prot'];
+const mk=(t,keys)=>t.trim().split('\n').map(l=>{const p=l.split('|');const o={n:p[0],r:RAR[p[1]]};keys.forEach((k,i)=>o[k]=+p[i+2]||0);return o;});
+/* Item IDs follow the wiki order (index = game "type"). Keys: sword n|rarity|dmg|prot|hp|gold */
+const SW_K=['dmg','prot','hp','gold'],SH_K=['prot','hp','gold','dm'],PET_K=['gold','pow','spd'];
+const SWORDS=mk(`Old Sword|C|10|0|0|.25
+Orc Sword|C|15|0|.25|.25
+Double-Edged Sword|R|100|0|.5|0
+Spiked Sword|R|250|0|.75|.5
+Dead Man's Sword|E|3000|0|1.5|1.5
+Machete Sword|C|750|0|1|.75
+Scimitar Claw|C|1000|1000|1.25|1
+Morbid Will|R|2000|1500|1.75|1.25
+Inferno Claw|R|3000|1750|2|1.5
+Burned Spikeblade|E|15000|3000|3|3
+Icebreaker|C|5000|2000|2.5|2
+Frostbite|C|7500|2500|3|3
+Froststeel|R|10000|3000|2.75|3
+Frostfang|R|15000|4000|3|3.5
+Winter's Wrath|E|500000|15000|5|5
+Sandstrike|C|25000|0|3.25|3.75
+Duneslicer|C|40000|0|3.5|3.5
+Sandslasher|R|60000|100000|3.5|3
+Sunfire|R|85000|250000|3.5|3.75
+Emberwraith|E|1e6|1e6|6|6
+Blade of Sorrow|C|1e5|0|4|3.75
+Flame Heart|C|150000|750000|4.25|3.75
+Darkblade|R|200000|1e6|4.5|4
+Fatecutter|R|250000|2e6|4.75|4
+Devil's Blade|E|1e7|3e6|6|4
+Spear of Zeus|E|1.5e7|0|0|0
+Coral Blade|C|5e6|2.5e6|5|4
+Spiked Moss|R|12e6|4e6|5.5|4.25
+Guardian's Spear|E|50e6|6e6|6|4.5
+Starfire Blade|C|50e6|5e6|5.75|4.5
+Nova Blade|R|70e6|5e6|6.5|4.5
+Cosmic Blader|E|100e6|12e6|6|8
+Dragon's Teeth|R|60e6|8e6|7|5
+Dragon's Poison|E|200e6|12e6|9|7
+Netherite Blade|R|500e6|20e6|8|10
+Death's Scythe|E|1e9|80e6|12|12
+Einherjar's Blade|C|800e6|70e6|10|10
+Runebreaker|R|1.5e9|100e6|11|11
+Solbrand|E|2e9|150e6|15|16
+GraveBorn Edge|C|1.4e9|100e6|11|11
+Dreadmourne|R|3e9|200e6|13|13
+Soulkeeper's Blade|E|4e9|250e6|17|18
+Draco Devil|L|6e9|120e6|15|15
+Divinity Edge|L|9e9|300e6|20|20
+Last Horizon|L|12e9|400e6|23|23`,SW_K);
+/* shield: n|rarity|prot|hp|gold|dmgMulti */
+const SHIELDS=mk(`Wooden Shield|C|100|0|0|0
+Iron Shield|C|250|0|.25|0
+Elite Shield|R|500|0|0|.25
+Warrior's Shield|R|750|.25|.25|0
+Shield of the Kingdom|E|3000|2|2|0
+Sweetguard|C|2000|.5|.25|0
+Warden's Shield|C|3000|.75|.5|0
+Light Barrier|R|5000|1|.75|0
+Obsidian Canny|R|7000|1.5|1|0
+Dead Guard's Shield|E|15000|3|3|.5
+Snowfall Defender|C|8000|2|1.5|0
+Arctic Ward|C|10000|1.5|1|0
+Icy Rampart|R|12000|2|1.5|0
+Frozen Fortress|R|15000|2.25|3|0
+Winter's Wrathguard|E|50000|4|5|1
+Sunshield|C|25000|2.5|3|0
+Barbed Sunward|C|25000|2.75|2.5|.25
+Sunshroud|R|50000|3|2|0
+Sandstone Shield|R|70000|3|2.25|.25
+Emberwraith Shield|E|500000|3.25|2.5|0
+Hell Shield|C|250000|3.5|2.5|0
+Shield of Fire|C|300000|3.75|2.25|0
+Fire Rampart|R|600000|4|2.5|0
+Infernal Protection|R|1e6|4.25|2.25|0
+Lord of Hell|E|3e6|5|6|.5
+Steel Shield|C|1e6|4.5|2|0
+Hardened Moss|R|2.5e6|5|2.25|0
+Guardian's Protection|E|4e6|6|5|1
+Nebula Shield|C|3e6|5|2.5|0
+Starburst Shield|R|6e6|6|3|0
+Lunar Shield|E|10e6|6|6|1.5
+Dragon's Shell|R|6e6|8|3|1
+Dragon's Anger|E|10e6|12|10|2
+Death's Shield|E|300e6|13|13|4
+Einherjar's Guard|C|12e6|6.5|6.5|1.75
+Runeguard|R|100e6|10|10|2.5
+Sunward Bulwark|E|2e9|15|15|5
+Crackshield|C|20e6|8|8|2
+Tombplate|C|150e6|12|12|3
+Sealguard|E|3e9|17|17|6.5
+Dragon's Soul|E|1e9|15|15|6
+Asgardian Aegis|L|10e9|20|20|9
+Final Bastion|L|14e9|23|21|18`,SH_K);
+/* pet: n|rarity|gold|power|speed */
+const PETS=mk(`Piggie|C|.25|0|0
+Chicko|C|.5|.25|0
+Peppy|E|2|1.5|.25
+Gumbear|C|.75|.5|0
+Croco|C|1|.75|0
+Blue Axolotl|E|3|3|.5
+Fluffy|C|1.25|1|0
+Sandy|C|1.5|1.25|0
+Pengoo|E|4|5|.25
+Scorp|C|1.75|1.75|0
+Kamel|R|2|2.5|0
+Leo|E|5|6|1
+Lava Slime|C|2.5|3|0
+Firebat|R|2.75|3.5|1
+Phoenix|E|7|8|.5
+Nemo|C|3|3.5|0
+Sharkie|R|3.5|4|0
+Octoo|E|7.5|8.5|.5
+Fogo|C|3.75|4.25|0
+Purr|R|4|4.5|0
+Xen|E|10|10|.75
+Mimic|C|4|4.5|0
+Triwulf|R|4.25|4.75|0
+Inferno|E|10.25|10.25|1
+Ponyo|C|4.25|4.75|0
+Chandy|R|4.5|5|0
+Runix|E|12.5|13.5|1.2`,PET_K);
+const ENEMY_NAMES='Roundhead,Forest Orc,Bonechewer,Cocoa Guardian,Chocolate Knight,Mallowbeast,Ice King,Spiked Tortoise,Cursed Stone,Mummy,Giant Moai,Lava Rock,Nether Lord,Zeus,Crokora,Hydrino,Temple Guardian,Bouugo,Anaxion,Xenomor,Dragon Guardian,Dragon,Reaper,Thrones,Seraphim,The Rival,Wargmaw,Lornblade,Mordolith'.split(',');
+const ENCHANT_NAMES={}; // e.g. {0:'Looting', 1:'Thorns'}
+
+const SUF=['','K','M','B','T','Qa','Qi','Sx','Sp','Oc','No','Dc'];
+const abbr=n=>{if(typeof n!=='number'||!isFinite(n))return '—';if(Math.abs(n)<1000)return n.toLocaleString(undefined,{maximumFractionDigits:2});
+  const i=Math.min(Math.floor(Math.log10(Math.abs(n))/3),SUF.length-1);return (n/Math.pow(10,3*i)).toFixed(2).replace(/\.?0+$/,'')+SUF[i];};
+const full=n=>typeof n==='number'&&isFinite(n)?n.toLocaleString('en-US',{useGrouping:true,maximumFractionDigits:0}):'';
+const fmt=v=>v===undefined||v===null?'—':typeof v==='number'?abbr(v):String(v);
+const rows=list=>list.map(([k,v,tip])=>`<div class="kv"><span>${esc(k)}</span><b ${tip?`title="${esc(tip)}"`:''}>${esc(fmt(v))}</b></div>`).join('');
+const num=(o,k)=>[o&&o[k],o&&typeof o[k]==='number'?full(o[k]):''];
+const ench=a=>Array.isArray(a)&&a.length?a.map(e=>`${ENCHANT_NAMES[e.type]||'Enchant '+e.type} Lv ${e.level}`).join(', '):'None';
+const sline=(o,keys)=>keys.filter(k=>o[k]).map(k=>LBL[k]+' '+(BIG.includes(k)?abbr(o[k]):'x'+o[k])).join(' · ')||'—';
+const gear=(g,L,K)=>{if(!g||typeof g!=='object')return ['—','—','—','—'];const it=L[g.type];return [`${it?it.n:'Type '+g.type} · Lv ${g.level}`,ench(g.enchantments),g.itemId,it?sline(it,K):'—'];};
 
 function render(inv){
-  const sword=item(pick(inv,['activeSword','equippedSword','sword'])),shield=item(pick(inv,['activeShield','equippedShield','shield']));
-  const hp=pick(inv,['health','hp']),mhp=pick(inv,['maxHealth','maxHp']);
-  const kills=pick(inv,['killedEnemyTypes','killedEnemies'])||{};
-  const kr=Object.entries(kills).sort((a,b)=>(+b[1]||0)-(+a[1]||0));
+  const sw=gear(inv.activeSword,SWORDS,SW_K),sh=gear(inv.activeShield,SHIELDS,SH_K);
+  const pets=Array.isArray(inv.activePets)?inv.activePets:[];
+  const books=Array.isArray(inv.activeBooks)?inv.activeBooks:[];
+  const usedBooks=books.filter(b=>b>0);
+  const kills=Object.entries(inv.killedEnemyTypes||{}).map(([k,v])=>[k,+v||0]).sort((a,b)=>b[1]-a[1]);
+  const total=kills.reduce((t,[,v])=>t+v,0),max=kills.length?kills[0][1]:1;
+  const c=k=>Array.isArray(inv[k])?inv[k].length:undefined;
   $('out').innerHTML=`<div class="grid">
    <div class="card gold"><h3>Core statistics</h3>${rows([
-     ['Level',pick(inv,['level','lvl'])],['Total power',pick(inv,['totalPower','power'])],['Gold',pick(inv,['gold','coins'])],
-     ['Health',hp!==undefined||mhp!==undefined?`${fmt(hp)} / ${fmt(mhp)}`:undefined],
-     ['Gold multiplier',pick(inv,['goldMultiplier','goldMulti'])],['Power multiplier',pick(inv,['powerMultiplier','powerMulti'])]])}</div>
+     ['Level',...num(inv,'level')],['Total power',...num(inv,'power')],['Gold',...num(inv,'gold')],
+     ['Health',inv.health!==undefined?`${abbr(inv.health)} / ${abbr(inv.maxHealth)}`:undefined,`${full(inv.health)} / ${full(inv.maxHealth)}`],
+     ['Gold multiplier',inv.goldMultiplier!==undefined?'x'+inv.goldMultiplier:undefined],
+     ['Power multiplier',inv.powerMultiplier!==undefined?'x'+inv.powerMultiplier:undefined],
+     ['Attack speed',typeof inv.attackSpeed==='number'?inv.attackSpeed.toFixed(2):undefined],
+     ['Experience',...num(inv,'experience')]])}</div>
    <div class="card"><h3>Active loadout</h3>${rows([
-     ['Sword (item ID)',sword.id],['Sword level',sword.lvl],['Shield (item ID)',shield.id],['Shield level',shield.lvl],
-     ['Active pets',count(pick(inv,['activePets','equippedPets','pets']))],['Active books',count(pick(inv,['activeBooks','equippedBooks','books']))]])}</div>
-   <div class="card"><h3>Combat record</h3>${kr.length?rows(kr):'<p class="empty">No kill data in this response.</p>'}</div>
+     ['Sword',sw[0]],['Base stats',sw[3]],['Sword enchants',sw[1]],['Sword item ID',sw[2]],
+     ['Shield',sh[0]],['Base stats',sh[3]],['Shield enchants',sh[1]],['Shield item ID',sh[2]],
+     ['Active pets',`${pets.length} / ${inv.maxActivePetCount??'—'}`],
+     ['Pet types',pets.length?pets.map(p=>(PETS[p.type]||{n:'Type '+p.type}).n).join(', '):'None'],
+     ['Active books',usedBooks.length?usedBooks.join(', '):`None (${books.length} slots empty)`]])}</div>
+   <div class="card"><h3>Collection</h3>${rows([
+     ['Swords owned',c('swords')],['Shields owned',c('shields')],['Pets owned',c('pets')],['Books owned',c('books')],
+     ['Helmets',c('helmets')],['Torsos',c('torsos')],['Pants',c('pants')],['Shoes',c('shoes')]])}</div>
+   <div class="card" style="grid-column:1/-1"><h3>Combat record</h3>
+     ${kills.length?`<div class="kv"><span>Total kills</span><b title="${full(total)}">${abbr(total)}</b></div>
+     <div class="kills">${kills.map(([k,v])=>`<div class="kr"><span>${esc(ENEMY_NAMES[k]||'Type '+k)}</span><i style="width:${Math.max(2,v/max*100)}%"></i><b>${v.toLocaleString()}</b></div>`).join('')}</div>`
+     :'<p class="empty">No kill data in this response.</p>'}</div>
   </div>
-  <details><summary>Raw response (use this to check real field names)</summary><pre>${esc(JSON.stringify(inv,null,2))}</pre></details>`;
+  <p class="note">Item, pet and enemy names are matched from type numbers using the wiki order. If a name looks wrong, the mapping needs adjusting.</p><details><summary>Raw response</summary><pre>${esc(JSON.stringify(inv,null,2))}</pre></details>`;
 }
 
 async function lookup(){
@@ -145,18 +307,29 @@ $('go').onclick=lookup;$('u').addEventListener('keydown',e=>{if(e.key==='Enter')
 
 /* ---------- tools (edit these values after verifying in-game) ---------- */
 const REFERENCE={
-  stats:[['Weapon damage scaling','+25% per level'],['Active pet cap','3'],['Source','Unverified: confirm in-game']],
+  stats:[['Active pet cap','3 (seen in player data)'],['Weapon level scaling','Not confirmed yet']],
   enchants:[['S','Looting, Flame','Best for farming speed and damage'],['A','Thorns','Situational: defensive'],['B','Other enchants','Fill remaining slots']]
 };
 $('ref').innerHTML=rows(REFERENCE.stats);
 $('ench').innerHTML='<tr><th>Tier</th><th>Enchants</th><th>Why</th></tr>'+REFERENCE.enchants.map(r=>`<tr>${r.map(c=>`<td>${esc(c)}</td>`).join('')}</tr>`).join('');
 
+function paintDb(){
+  const k=$('dbk').value,q=$('dbq').value.toLowerCase().trim();
+  const cols=k==='pets'?['gold','pow','spd']:k==='swords'?SW_K:SH_K;
+  const list={swords:SWORDS,shields:SHIELDS,pets:PETS}[k];
+  const cell=(it,f)=>BIG.includes(f)?abbr(it[f]):(it[f]||'—');
+  const body=list.map((it,i)=>[i,it]).filter(([i,it])=>!q||it.n.toLowerCase().includes(q)||String(i)===q)
+    .map(([i,it])=>`<tr><td>${i}</td><td>${esc(it.n)}</td><td>${esc(it.r)}</td>${cols.map(f=>`<td>${cell(it,f)}</td>`).join('')}</tr>`).join('');
+  $('dbt').innerHTML=`<table><tr><th>#</th><th>Name</th><th>Rarity</th>${cols.map(f=>`<th>${LBL[f]}</th>`).join('')}</tr>${body||'<tr><td colspan="9">No matches</td></tr>'}</table>`;
+}
+$('dbk').onchange=paintDb;$('dbq').oninput=paintDb;paintDb();
+
 const FLAGS=[['guild','Guild tracking checklist','A simple task list for your guild'],['compare','Item comparison calculator','Compare two items side by side'],['market','Market trade value estimator','Estimate what a trade is worth']];
 const flags=store.get('flags',{});
 function paintFlags(){
-  $('flags').innerHTML=FLAGS.map(([k,t,d])=>`<label class="tg"><input type="checkbox" data-k="${k}" ${flags[k]?'checked':''}><span>${t}<small>${d}${k==='guild'?'':' (coming soon)'}</small></span></label>`).join('');
-  $('guild').classList.toggle('hidden',!flags.guild);
-  const soon=FLAGS.filter(f=>f[0]!=='guild'&&flags[f[0]]);
+  $('flags').innerHTML=FLAGS.map(([k,t,d])=>`<label class="tg"><input type="checkbox" data-k="${k}" ${flags[k]?'checked':''}><span>${t}<small>${d}${k==='guild'||k==='compare'?'':' (coming soon)'}</small></span></label>`).join('');
+  $('guild').classList.toggle('hidden',!flags.guild);$('compare').classList.toggle('hidden',!flags.compare);
+  const soon=FLAGS.filter(f=>!['guild','compare'].includes(f[0])&&flags[f[0]]);
   $('soon').classList.toggle('hidden',!soon.length);
   $('soonlist').innerHTML=soon.map(f=>`<div class="check">• ${f[1]}</div>`).join('');
   document.querySelectorAll('#flags input').forEach(i=>i.onchange=()=>{flags[i.dataset.k]=i.checked;store.set('flags',flags);paintFlags();});
@@ -172,6 +345,14 @@ function paintTasks(){
 function addTask(){const v=$('newtask').value.trim();if(!v)return;tasks.push({text:v,done:false});$('newtask').value='';store.set('tasks',tasks);paintTasks();}
 $('addtask').onclick=addTask;$('newtask').addEventListener('keydown',e=>{if(e.key==='Enter')addTask();});
 paintTasks();
+const CAT={Swords:[SWORDS,SW_K],Shields:[SHIELDS,SH_K],Pets:[PETS,PET_K]};
+$('cc').innerHTML=Object.keys(CAT).map(k=>`<option>${k}</option>`).join('');
+function fillCmp(){const L=CAT[$('cc').value][0];['ca','cb'].forEach((id,i)=>{$(id).innerHTML=L.map((o,j)=>`<option value="${j}">${esc(o.n)}</option>`).join('');$(id).value=L.length-2+i;});showCmp();}
+function showCmp(){const [L,K]=CAT[$('cc').value],A=L[$('ca').value],B=L[$('cb').value];if(!A||!B)return;
+  const v=(o,k)=>BIG.includes(k)?abbr(o[k]):'x'+o[k];
+  $('cres').innerHTML='<table><tr><th></th><th>'+esc(A.n)+' ('+A.r+')</th><th>'+esc(B.n)+' ('+B.r+')</th></tr>'+K.map(k=>{const w=A[k]===B[k]?0:A[k]>B[k]?1:2;
+    return `<tr><td>${LBL[k]}</td><td style="${w===1?'color:var(--gold);font-weight:600':''}">${v(A,k)}</td><td style="${w===2?'color:var(--gold);font-weight:600':''}">${v(B,k)}</td></tr>`;}).join('')+'</table>';}
+$('cc').onchange=fillCmp;$('ca').onchange=showCmp;$('cb').onchange=showCmp;fillCmp();
 </script>
 </body>
 </html>
