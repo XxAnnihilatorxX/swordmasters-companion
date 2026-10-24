@@ -126,6 +126,18 @@ nav{overflow:visible;flex-wrap:wrap;white-space:normal;gap:4px}nav button{paddin
 .fg2{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:10px 0}
 .fg2 label{font-size:11px;color:var(--mute);display:flex;flex-direction:column;gap:4px}
 .fg2 input,.fg2 select{width:100%;padding:10px 12px}
+.mg{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:8px}
+.mrow{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-left:3px solid var(--c);border-radius:8px;padding:6px 10px;background:var(--card)}
+.mrow span{flex:1;font-size:13px}.mrow em{font-style:normal;font-size:10px;color:var(--c)}.mrow input{width:76px;flex:none;padding:6px 8px}
+.chip{display:inline-flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--bad);border-radius:8px;padding:4px 8px;font-size:12px}
+.chip select{font-size:11px;padding:3px 6px}
+.recs{display:grid;gap:10px;margin-top:12px}
+.rc{display:flex;justify-content:space-between;gap:14px;align-items:center;background:#0f1322;border:1px solid var(--line);border-left:4px solid var(--c);border-radius:10px;padding:12px 14px}
+.rc .tg{font:700 9px Orbitron,sans-serif;color:var(--c);letter-spacing:.14em}.rc .rt{font:700 13px Orbitron,sans-serif;margin-top:2px}
+.rc p{margin:4px 0 0;color:var(--mute);font-size:12.5px}
+.rc .gv{font:800 15px Orbitron,sans-serif;color:var(--c);white-space:nowrap;text-align:right}.rc .gv small{display:block;color:var(--mute);font:500 10px Inter,sans-serif;letter-spacing:.06em}
+#mapper textarea{width:100%;min-height:60px;background:#0a0c13;border:1px solid var(--line);border-radius:8px;color:var(--text);padding:10px;margin:10px 0 6px;font:12px monospace}
+#mapper td input{width:100%;padding:8px 10px;font-size:13px}
 .hidden{display:none}
 .check{display:flex;gap:8px;align-items:center;padding:5px 0}
 @media(max-width:520px){.search{flex-direction:column}.go{padding:14px}}
@@ -138,6 +150,7 @@ nav{overflow:visible;flex-wrap:wrap;white-space:normal;gap:4px}nav button{paddin
 <nav role="tablist">
   <button role="tab" aria-selected="true" data-tab="search">Player lookup</button>
   <button role="tab" aria-selected="false" data-tab="compare">Compare players</button>
+  <button role="tab" aria-selected="false" data-tab="adv">Gear Advisor</button>
   <button role="tab" aria-selected="false" data-tab="drops">Drop finder</button>
   <button role="tab" aria-selected="false" data-tab="lab">Upgrade Lab</button>
   <button role="tab" aria-selected="false" data-tab="info">Game Info</button>
@@ -190,6 +203,10 @@ nav{overflow:visible;flex-wrap:wrap;white-space:normal;gap:4px}nav button{paddin
   <div class="search"><input id="gq" type="text" placeholder="Search" aria-label="Search"><select id="gf" aria-label="Filter"></select></div>
   <div class="cg" id="gt"></div>
 </section>
+<section id="adv" class="hidden">
+  <div class="search"><input id="au" type="text" maxlength="32" placeholder="Enter a username to analyse" aria-label="Username" autocomplete="off"><button class="go" id="ago">ANALYSE</button></div>
+  <div id="amsg" aria-live="polite"></div><div id="aout"></div>
+</section>
 <section id="staff" class="hidden"></section>
 </main>
 
@@ -199,7 +216,8 @@ const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'
 const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
 
 /* ---------- tabs ---------- */
-const TABS=['search','compare','drops','lab','info','staff'],nav=document.querySelector('nav');
+addEventListener('hashchange',()=>location.reload());
+const TABS=['search','compare','adv','drops','lab','info','staff'],nav=document.querySelector('nav');
 nav.insertAdjacentHTML('beforeend','<span class="ind"></span>');
 function moveInd(){const b=nav.querySelector('[aria-selected=true]'),i=nav.querySelector('.ind');i.style.left=b.offsetLeft+'px';i.style.width=b.offsetWidth+'px';i.style.top=(b.offsetTop+b.offsetHeight-2)+'px';}
 nav.querySelectorAll('button').forEach(b=>b.onclick=()=>{nav.querySelectorAll('button').forEach(x=>x.setAttribute('aria-selected',x===b));TABS.forEach(t=>$(t).classList.toggle('hidden',t!==b.dataset.tab));moveInd();});
@@ -347,8 +365,10 @@ const sline=(o,keys)=>keys.filter(k=>o[k]).map(k=>LBL[k]+' '+(BIG.includes(k)?ab
 const gear=(g,L,K)=>{if(!g||typeof g!=='object')return ['—','—','—','—'];const it=L[g.type];return [`${it?it.n:'Type '+g.type} · Lv ${g.level}`,ench(g.enchantments),g.itemId,it?sline(it,K):'—'];};
 
 const IDMAP={swords:{44:"Soulkeeper's Blade"},shields:{5:'Shield of the Kingdom',42:'Sealguard'},pets:{21:'XPeppy',22:'XAxolotl',23:'XPengoo',24:'XLeo'}};
-const MAP=location.hash==='#mapper',saved=store.get('idmap',{});
-['swords','shields','pets'].forEach(k=>Object.assign(IDMAP[k],saved[k]||{}));
+const MAP=location.hash==='#mapper',saved=store.get('idmap',{}),snap=store.get('idmap2',null);
+['swords','shields','pets'].forEach(k=>{if(snap&&snap[k])IDMAP[k]=snap[k];else Object.assign(IDMAP[k],saved[k]||{});});
+const saveMap=()=>store.set('idmap2',IDMAP);
+function assign(k,id,name){Object.keys(IDMAP[k]).forEach(i=>{if(IDMAP[k][i]===name)delete IDMAP[k][i];});if(id!==''&&id!==null)IDMAP[k][id]=name;saveMap();}
 const CATS={swords:SWORDS,shields:SHIELDS,pets:PETS};
 PETS.push(...mk(`XPeppy|L|13|12|.5
 XAxolotl|L|15|13|.6
@@ -363,7 +383,7 @@ XRunix|L|27.5|27.5|1.35`,PET_K));
 const fixI=(L,n,o)=>{const x=L.find(i=>i.n.toLowerCase()===n.toLowerCase());if(x)Object.assign(x,o);};
 fixI(SWORDS,'Last Horizon',{gold:22});fixI(SWORDS,'Draco Devil',{n:"Dragon's Devil"});fixI(SWORDS,'Graveborn Edge',{n:'Graveborn Edge'});
 fixI(SWORDS,"Dragon's Teeth",{dmg:9e7});fixI(SWORDS,'Blade of Sorrow',{prot:5e5});fixI(SWORDS,'Duneslicer',{prot:15000});fixI(SWORDS,'Sandstrike',{prot:10000});
-fixI(SHIELDS,'Asgardian Aegis',{dm:14});fixI(SHIELDS,"Dragon's Soul",{dm:9,hp:17,gold:17,prot:1e9});fixI(SHIELDS,'Barbed Sunward',{prot:35000});
+fixI(SHIELDS,'Asgardian Aegis',{dm:14});fixI(SHIELDS,"Dragon's Soul",{r:'Legendary'});fixI(SHIELDS,'Tombplate',{r:'Rare'});fixI(PETS,'Sandy',{r:'Rare'});fixI(PETS,'Croco',{r:'Rare'});fixI(PETS,'Chicko',{r:'Rare'});fixI(SHIELDS,"Dragon's Soul",{dm:9,hp:17,gold:17,prot:1e9,r:'Legendary'});fixI(PETS,'Sandy',{r:'Rare'});fixI(PETS,'Croco',{r:'Rare'});fixI(PETS,'Chicko',{r:'Rare'});fixI(SHIELDS,'Barbed Sunward',{prot:35000});
 const byId=(k,t)=>{const n=IDMAP[k][t];return n?CATS[k].find(x=>x.n===n):undefined;};
 const RC={Common:'#3dffa0',Rare:'#38b6ff',Epic:'#b36bff',Legendary:'#ffc83d'},RK={Common:1,Rare:2,Epic:3,Legendary:4};
 const ENS={swords:[[0,'Flame','#ff7a3d'],[2,'Looting','#ffc83d'],[3,'Freeze','#38d6ff']],shields:[[1,'Thorns','#3dffa0'],[2,'Looting','#ffc83d'],[4,'Fortune','#b36bff']]};
@@ -391,7 +411,7 @@ function cards(groups,kind){
   if(!groups.length)return '<p class="empty">None</p>';
   return `<div class="inv">${groups.map(({o,n,eq})=>{const it=byId(kind,o.type),rc=it?RC[it.r]:'#4a5170';
     const st=!it?'':kind==='swords'?'Damage '+abbr(it.dmg*sc(o)):kind==='shields'?(it.dm?'Dmg multi x'+(+(it.dm*sc(o)).toFixed(2)):'Protection '+abbr(it.prot*sc(o))):'Gold x'+it.gold+' · Power x'+it.pow;
-    return `<div class="it${eq?' eq':''}" style="--rc:${rc}"><div class="top"><span>${it?it.r.toUpperCase():'UNKNOWN'}</span>${gear?`<span class="lv">LV ${o.level}</span>`:''}</div><div class="nm">${esc(it?it.n:'Item #'+o.type)}</div><div class="st">${esc(st)}</div>${gear?`<div class="sls">${slots(o,kind)}</div>`:''}${MAP&&!it?`<select class="mp" data-k="${kind}" data-t="${o.type}"><option value="">Name this item</option>${CATS[kind].map(x=>`<option>${esc(x.n)}</option>`).join('')}</select>`:''}${eq?'<span class="eqt">EQUIPPED</span>':''}${n>1?`<span class="x">x${n}</span>`:''}</div>`;}).join('')}</div>`;
+    return `<div class="it${eq?' eq':''}" style="--rc:${rc}"><div class="top"><span>${it?it.r.toUpperCase():'UNKNOWN'}</span>${gear?`<span class="lv">LV ${o.level}</span>`:''}</div><div class="nm">${esc(it?it.n:'Item #'+o.type)}</div><div class="st">${esc(st)}</div>${gear?`<div class="sls">${slots(o,kind)}</div>`:''}${MAPUI&&!it?`<select class="mp" data-k="${kind}" data-t="${o.type}"><option value="">Name this item</option>${CATS[kind].map(x=>`<option>${esc(x.n)}</option>`).join('')}</select>`:''}${eq?'<span class="eqt">EQUIPPED</span>':''}${n>1?`<span class="x">x${n}</span>`:''}</div>`;}).join('')}</div>`;
 }
 const WORLDS=[['Orkland',0,2],['Sugarland',3,5],['Iceworld',6,6],['Desertland',7,9],['Netherworld',10,12],['Heaven',13,13],['Aqualand',14,16],['Spaceland',17,19],['Dragon World',20,21],['Death World',22,22],['Asgard',23,25],['Godyard',26,28]];
 const BOSS=new Set([6,13,21,22,25,28]);
@@ -428,25 +448,55 @@ function bossCard(inv){
   return `<div class="card" style="margin-top:14px"><h3>Boss farming</h3><div class="tbl" style="max-height:none"><table><tr><th>Boss</th><th>Kill time</th><th>Kills / day</th><th>Power / day</th><th>Epic sword and shield drops / day</th></tr>${r}</table></div><p class="note">Solo, farming nonstop, with Looting x${lm}. Epic drop chance is 1% per kill before Looting.</p></div>`;
 }
 let LAST=null;
-function render(inv,name){
-  LAST=[inv,name];
+let MAPUI=false;
+function buildProfile(inv,name,withCombat){
+  noteSeen(inv);
   const c=calc(inv),L=+inv.level||0,xp=+inv.experience||0;
   const kills=Object.entries(inv.killedEnemyTypes||{}).map(([k,v])=>[k,+v||0]).sort((a,b)=>+a[0]-+b[0]);
   const total=kills.reduce((t,[,v])=>t+v,0),max=Math.max(1,...kills.map(k=>k[1]));
   const mini=[['GOLD MULTI',inv.goldMultiplier!==undefined?'x'+inv.goldMultiplier:'—'],['POWER MULTI',inv.powerMultiplier!==undefined?'x'+inv.powerMultiplier:'—'],['HIT SPEED',c.hits.toFixed(2)+'/s'],['DPS',c.dps?abbr(c.dps):'—']];
-  $('out').innerHTML=`<div class="who"><h2>${esc(name||'Player')}</h2></div>
+  return `<div class="who"><h2>${esc(name||'Player')}</h2></div>
   <div class="hero">${tile('POWER',abbr(inv.power),full(inv.power),'var(--blue)')}${tile('GOLD',abbr(inv.gold),full(inv.gold),'var(--gold)')}${tile('LEVEL',L.toLocaleString(),'','#3dffa0')}${tile('DAMAGE',c.dmg?abbr(c.dmg):'—',c.dmg?full(c.dmg):'','#ff7a3d')}${tile('MAX HEALTH',abbr(inv.maxHealth),full(inv.maxHealth),'var(--bad)')}</div>
   <div class="mini">${mini.map(([l,v])=>`<div><small>${l}</small><b>${esc(v)}</b></div>`).join('')}</div>
   <div class="card" style="margin-top:14px"><h3>Inventory</h3>
    <h4>SWORDS</h4>${cards(stacks(inv.swords,inv.activeSword&&inv.activeSword.itemId,'swords'),'swords')}
    <h4>SHIELDS</h4>${cards(stacks(inv.shields,inv.activeShield&&inv.activeShield.itemId,'shields'),'shields')}
    <h4>PETS</h4>${cards(stacks(inv.pets,(inv.activePets||[]).map(p=>p.itemId),'pets'),'pets')}</div>
-  ${bestSetup(inv)}${bossCard(inv)}${combat(inv.killedEnemyTypes||{})}
+  ${bestSetup(inv)}${bossCard(inv)}${withCombat?combat(inv.killedEnemyTypes||{}):''}
   ${MAP?`<div style="margin-top:14px"><button class="go" id="cm" style="padding:12px 18px">COPY MAPPING JSON</button><details><summary>Raw response</summary><pre>${esc(JSON.stringify(inv,null,2))}</pre></details></div>`:''}`;
 }
-$('out').addEventListener('change',e=>{const t=e.target;if(!t.classList||!t.classList.contains('mp')||!t.value)return;const k=t.dataset.k;saved[k]=saved[k]||{};saved[k][t.dataset.t]=t.value;store.set('idmap',saved);IDMAP[k][t.dataset.t]=t.value;if(LAST)render(LAST[0],LAST[1]);});
+function render(inv,name){LAST=[inv,name];MAPUI=MAP;$('out').innerHTML=buildProfile(inv,name,true);}
+$('out').addEventListener('change',e=>{const t=e.target;if(!t.classList||!t.classList.contains('mp')||!t.value)return;assign(t.dataset.k,t.dataset.t,t.value);if(LAST)render(LAST[0],LAST[1]);});
 $('out').addEventListener('click',e=>{if(e.target.id==='cm'){try{navigator.clipboard.writeText(JSON.stringify(IDMAP));e.target.textContent='COPIED';}catch(x){}}});
 
+const seenAll=store.get('seen',{swords:{},shields:{},pets:{}});
+function noteSeen(inv){if(!MAP)return;['swords','shields','pets'].forEach(k=>{seenAll[k]=seenAll[k]||{};(inv[k]||[]).forEach(o=>{seenAll[k][o.type]=1;});});store.set('seen',seenAll);}
+if(MAP){
+  const b=document.createElement('button');b.setAttribute('role','tab');b.setAttribute('aria-selected','false');b.dataset.tab='mapper';b.textContent='Mapper';
+  nav.insertBefore(b,nav.querySelector('.ind'));
+  const sec=document.createElement('section');sec.id='mapper';sec.className='hidden';document.querySelector('main').appendChild(sec);TABS.push('mapper');
+  b.onclick=()=>{nav.querySelectorAll('button').forEach(x=>x.setAttribute('aria-selected',x===b));TABS.forEach(t=>$(t).classList.toggle('hidden',t!==b.dataset.tab));moveInd();};
+}
+function paintMapper(){
+  const K=[['swords','Swords',SWORDS],['shields','Shields',SHIELDS],['pets','Pets',PETS]];
+  const idOf=(k,n)=>{const e=Object.entries(IDMAP[k]).find(([,v])=>v===n);return e?e[0]:'';};
+  $('mapper').innerHTML=`<div class="card gold"><h3>ID mapper</h3><p class="note">Type each item's game ID next to its name. Look up players first: unnamed IDs that appear in lookups are listed under each category so you can name them.</p>
+   <div class="search"><button class="go" id="mcopy" style="padding:12px 18px">COPY MAPPING JSON</button><button class="go" id="mreset" style="padding:12px 18px;background:var(--bad)">RESET</button></div></div>`+
+  K.map(([k,t,L])=>{const unk=Object.keys(seenAll[k]||{}).map(Number).sort((a,b)=>a-b).filter(i=>!IDMAP[k][i]);
+    return `<div class="card" style="margin-top:14px"><h3>${t} · ${L.filter(x=>idOf(k,x.n)!=='').length} / ${L.length} named</h3>
+    ${unk.length?`<h4>UNNAMED IDS SEEN</h4><div class="inv" style="margin-bottom:10px">${unk.map(i=>`<span class="chip">#${i} <select data-k="${k}" data-id="${i}"><option value="">Pick name</option>${L.map(x=>`<option>${esc(x.n)}</option>`).join('')}</select></span>`).join('')}</div>`:''}
+    <div class="mg">${L.map((x,i)=>`<label class="mrow" style="--c:${RC[x.r]}"><span>${esc(x.n)}</span><em>${x.r}</em><input type="number" min="0" data-k="${k}" data-n="${esc(x.n)}" value="${idOf(k,x.n)}" placeholder="ID"></label>`).join('')}</div></div>`;}).join('');
+}
+if(MAP){
+  $('mapper').addEventListener('change',e=>{const t=e.target;
+    if(t.dataset.n!==undefined)assign(t.dataset.k,t.value.trim(),t.dataset.n);
+    else if(t.dataset.id!==undefined&&t.value)assign(t.dataset.k,t.dataset.id,t.value);else return;
+    paintMapper();if(LAST)render(LAST[0],LAST[1]);});
+  $('mapper').addEventListener('click',e=>{
+    if(e.target.id==='mcopy'){try{navigator.clipboard.writeText(JSON.stringify(IDMAP));e.target.textContent='COPIED';}catch(x){}}
+    if(e.target.id==='mreset'){store.set('idmap2',null);store.set('idmap',{});location.reload();}});
+  paintMapper();
+}
 async function getPlayer(name){const r=await fetch('/api/lookup?username='+encodeURIComponent(name));const j=await r.json().catch(()=>({}));if(!r.ok||!j.success)throw new Error((j.error||'Lookup failed ('+r.status+').')+' ['+name+']');return j.data;}
 
 async function lookup(){
@@ -785,6 +835,69 @@ function paintClan(){
   $('cf').innerHTML=minis([['TIME ADDED',dur(sec)],['SECONDS',sec.toLocaleString()]]);
 }
 ['cc0','cc1','cc2','cc3','cc4','cg','cl'].forEach(i=>{$(i).oninput=paintClan;$(i).onchange=paintClan;});paintClan();
+
+
+/* ---------- gear advisor ---------- */
+const ADXP={Peppy:['XPeppy',1],'Blue Axolotl':['XAxolotl',2],Pengoo:['XPengoo',3],Leo:['XLeo',4],Phoenix:['XPhoenix',5],Octoo:['XOctoo',6],Xen:['XXen',7],Runix:['XRunix',19]};
+const ADLOOT=[1,1.6,2.2,2.8,3.4,4,4],ADTAG={SWAP:'#ffc83d',MERGE:'#38b6ff',ENCHANT:'#ff7a3d',PETS:'#3dffa0',ENHANCE:'#b36bff',TARGET:'#ff5db1'};
+const advStat=(sw,sl,fl,sh,hl,P,L)=>{const DS=sw.dmg*(1+.25*(sl-1)),MS=sh?sh.dm*(1+.25*(hl-1)):0,r=Math.sqrt(P),d=(DS+2*r+1)*(1+MS),f=fl?(2*r+DS)/(10-fl)*(1+MS):0,h=1+.5*Math.pow(L,1/8);return {dmg:d,dps:d*h+f};};
+const advPc=(a,b)=>b>0?(a/b-1)*100:0;
+const advOdds=(n,L,F)=>{const e=EN.find(x=>x[0]===n),t=Math.max(0,Math.min(1,(L-2000)/18000));let c=e[2].map((v,i)=>v+(e[3][i]-v)*t);const mv=c[0]*.05*F,sm=c[1]+c[2]+c[3];return [c[0]-mv,...[1,2,3].map(i=>c[i]+mv*c[i]/sm)];};
+const adEn=(o,t)=>{const e=o&&(o.enchantments||[]).find(x=>x.type===t);return e?e.level:0;};
+function advAnalyze(inv){
+  const P=+inv.power||0,L=+inv.level||0,pm=+inv.powerMultiplier||1,rec=[],aS=inv.activeSword,aH=inv.activeShield;
+  const sI=aS&&byId('swords',aS.type),hI=aH&&byId('shields',aH.type),ok=!!sI&&(!aH||!!hI),hl=aH?aH.level:1,F=adEn(aH,4);
+  const cur=ok?advStat(sI,aS.level,adEn(aS,0),hI,hl,P,L):null,res={cur,best:null,ok};
+  const uq=(l,k)=>{const m=new Map();(l||[]).forEach(o=>{const it=byId(k,o.type);const key=o.type+'|'+o.level+'|'+JSON.stringify(o.enchantments||[]);if(it&&!m.has(key))m.set(key,{o,it});});return [...m.values()];};
+  const OS=uq(inv.swords,'swords'),OH=uq(inv.shields,'shields'),HH=OH.length?OH:[{o:null,it:null}];
+  let best=null;OS.forEach(s=>HH.forEach(h=>{const r=advStat(s.it,s.o.level,adEn(s.o,0),h.it,h.o?h.o.level:1,P,L);if(!best||r.dps>best.dps)best={s,h,...r};}));res.best=best;
+  if(cur&&best&&best.dps>cur.dps*1.0005)rec.push({tag:'SWAP',title:`Equip ${best.s.it.n} Lv ${best.s.o.level}${best.h.it?' with '+best.h.it.n+' Lv '+best.h.o.level:''}`,text:'The strongest sword and shield combination you already own.',gain:advPc(best.dps,cur.dps),unit:'DPS'});
+  if(cur){
+    const grp=(l,k)=>{const m=new Map();(l||[]).forEach(o=>{const it=byId(k,o.type);if(!it)return;const key=o.type+'|'+o.level,g=m.get(key)||{o,it,n:0};g.n++;m.set(key,g);});return [...m.values()];};
+    const tryM=(g,k)=>{const need=g.o.level+1;if(g.n<need-2)return;const isEq=k==='swords'?(aS&&aS.type===g.o.type&&aS.level===g.o.level):(aH&&aH.type===g.o.type&&aH.level===g.o.level);
+      const r=k==='swords'?advStat(g.it,g.o.level+1,isEq?adEn(aS,0):0,hI,hl,P,L):advStat(sI,aS.level,adEn(aS,0),g.it,g.o.level+1,P,L);const gain=advPc(r.dps,cur.dps);if(gain<0.05)return;
+      rec.push({tag:'MERGE',title:`${g.it.n}: Lv ${g.o.level} to Lv ${g.o.level+1}`,text:g.n>=need?`You have ${g.n} of the ${need} needed. Merge them now.`:`You have ${g.n} of the ${need} needed.`,gain,unit:'DPS'});};
+    grp(inv.swords,'swords').forEach(g=>tryM(g,'swords'));grp(inv.shields,'shields').forEach(g=>tryM(g,'shields'));
+    const f=adEn(aS,0);if(f<3){const r=advStat(sI,aS.level,3,hI,hl,P,L),o=advOdds('Flame',L,F);rec.push({tag:'ENCHANT',title:f?'Raise Flame to Level III':'Add Flame to your sword',text:`Level III chance per try is ${+o[3].toFixed(2)}% at your level.`,gain:advPc(r.dps,cur.dps),unit:'DPS'});}
+    const lt=Math.min(6,adEn(aS,2)+adEn(aH,2));if(lt<6)rec.push({tag:'ENCHANT',title:'Add or raise Looting',text:`Drop rates go from x${ADLOOT[lt]} to x${ADLOOT[lt+1]} for each extra total level.`,gain:ADLOOT[lt+1]/ADLOOT[lt]*100-100,unit:'DROPS'});
+    if(!adEn(aS,3))rec.push({tag:'ENCHANT',title:'Add Freeze to your sword',text:'Slows enemies by 75% for as many seconds as the level. It adds no damage.',gain:null});
+    if(aH&&!adEn(aH,1))rec.push({tag:'ENCHANT',title:'Add Thorns to your shield',text:'Reflects 1% of a mob\'s health per level back as power.',gain:null});
+    if(aH&&!adEn(aH,4))rec.push({tag:'ENCHANT',title:'Add Fortune to your shield',text:'Adds 5% per level to NPC success chances.',gain:null});
+    const owned=new Set((inv.swords||[]).map(o=>o.type)),ownedH=new Set((inv.shields||[]).map(o=>o.type));
+    const base=advStat(sI,aS.level,0,hI,hl,P,L).dps;
+    const tgt=(L2,k,mk)=>{const c=L2.filter(x=>!(k==='swords'?owned:ownedH).has(Object.keys(IDMAP[k]).find(t=>IDMAP[k][t]===x.n))).map(x=>({x,d:mk(x).dps})).filter(z=>z.d>base*1.02).sort((a,b)=>a.d-b.d);
+      if(!c.length)return;const pick=[c[0]];if(c[c.length-1]!==c[0])pick.push(c[c.length-1]);
+      pick.forEach((z,i)=>{const src=dropsOf(z.x.n),sr=src.length?`Drops from ${src[0][0]} (${src[0][2]||'?'}%).`:ELFI.includes(z.x.n)?'Bought from the Elf.':'';
+        rec.push({tag:'TARGET',title:`${i?'Best goal':'Next step'}: ${z.x.n}`,text:`${sr} Compared before enchants and merging, at Lv 1.`,gain:advPc(z.d,base),unit:'DPS'});});};
+    tgt(SWORDS,'swords',x=>advStat(x,1,0,hI,hl,P,L));tgt(SHIELDS,'shields',x=>advStat(sI,aS.level,0,x,1,P,L));
+  }
+  const pets=(inv.pets||[]).map(o=>({o,it:byId('pets',o.type)})).filter(x=>x.it),act=(inv.activePets||[]).map(p=>byId('pets',p.type));
+  if(pets.length>=3&&act.length&&act.every(Boolean)){const top=[...pets].sort((a,b)=>b.it.pow-a.it.pow).slice(0,3),s1=act.reduce((t,p)=>t+p.pow,0),s2=top.reduce((t,x)=>t+x.it.pow,0);
+    if(s2>s1+1e-9)rec.push({tag:'PETS',title:'Equip '+top.map(x=>x.it.n).join(', '),text:`Pet power multipliers add up to ${+s2.toFixed(2)} instead of ${+s1.toFixed(2)}.`,gain:advPc(pm-s1+s2,pm),unit:'POWER'});}
+  const cnt=new Map();pets.forEach(p=>cnt.set(p.it.n,(cnt.get(p.it.n)||0)+1));
+  const tier=TIER.find(x=>L<=x[0])[1];
+  cnt.forEach((n,name)=>{const x=ADXP[name];if(!x||n<10)return;const free=Math.min(100,tier/x[1]*(1+.05*F)),att=Math.floor(n/10);
+    rec.push({tag:'ENHANCE',title:`${n} x ${name}: ${att} attempt${att>1?'s':''} at the Pet Enhancer`,text:`Makes ${x[0]}. Free chance ${+free.toFixed(2)}%, paid ${+Math.min(100,free*3).toFixed(2)}%.`,gain:null});});
+  const ord={SWAP:0,MERGE:1,ENCHANT:2,PETS:3,ENHANCE:4,TARGET:5};
+  rec.sort((a,b)=>(a.tag==='SWAP'?-1:0)-(b.tag==='SWAP'?-1:0)||((b.gain==null?-1:b.gain)-(a.gain==null?-1:a.gain))||ord[a.tag]-ord[b.tag]);
+  res.rec=rec;return res;
+}
+function advHtml(inv){
+  const a=advAnalyze(inv);
+  const tiles=a.cur?minis([['CURRENT DPS',abbr(a.cur.dps),full(a.cur.dps)],['BEST OWNED SETUP',abbr(a.best.dps),full(a.best.dps)],['POSSIBLE GAIN',a.best.dps>a.cur.dps*1.0005?'+'+(advPc(a.best.dps,a.cur.dps)).toFixed(1)+'%':'Already best'],['IDEAS',a.rec.length]]):'';
+  const list=a.rec.map(r=>`<div class="rc" style="--c:${ADTAG[r.tag]}"><div><div class="tg">${r.tag}</div><div class="rt">${esc(r.title)}</div><p>${esc(r.text)}</p></div>${r.gain==null?'':`<div class="gv">${r.gain>=0?'+':''}${Math.abs(r.gain)<10?r.gain.toFixed(1):Math.round(r.gain)}%<small>${r.unit}</small></div>`}</div>`).join('');
+  const note=a.ok?'':'<p class="empty" style="margin-top:12px">Some of this player\'s gear is not recognised yet, so damage-based advice is limited.</p>';
+  return `<div class="card gold" style="margin-top:14px"><h3>Upgrade advisor</h3>${tiles}${note}<div class="recs">${list||'<p class="empty">Nothing to suggest right now.</p>'}</div></div>`;
+}
+async function runAdvisor(){
+  const n=$('au').value.trim();$('aout').innerHTML='';
+  if(!n){$('amsg').innerHTML='<div class="banner">Enter a username first.</div>';return;}
+  $('ago').disabled=true;$('amsg').innerHTML='<div class="loading"><div class="spin"></div>Analysing…</div>';
+  try{const inv=await getPlayer(n);MAPUI=false;const mk='<div class="card" style="margin-top:14px"><h3>Inventory</h3>',h=buildProfile(inv,n,false);
+    $('amsg').innerHTML='';$('aout').innerHTML=h.replace(mk,advHtml(inv)+mk);}
+  catch(e){$('amsg').innerHTML=`<div class="banner">${esc(e.message)}</div>`;}finally{$('ago').disabled=false;}
+}
+$('ago').onclick=runAdvisor;$('au').addEventListener('keydown',e=>{if(e.key==='Enter')runAdvisor();});
 
 </script>
 </body>
