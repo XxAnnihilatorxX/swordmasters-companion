@@ -138,6 +138,10 @@ nav{overflow:visible;flex-wrap:wrap;white-space:normal;gap:4px}nav button{paddin
 .rc .gv{font:800 15px Orbitron,sans-serif;color:var(--c);white-space:nowrap;text-align:right}.rc .gv small{display:block;color:var(--mute);font:500 10px Inter,sans-serif;letter-spacing:.06em}
 #mapper textarea{width:100%;min-height:60px;background:#0a0c13;border:1px solid var(--line);border-radius:8px;color:var(--text);padding:10px;margin:10px 0 6px;font:12px monospace}
 #mapper td input{width:100%;padding:8px 10px;font-size:13px}
+.nd{display:grid;grid-template-columns:150px 1fr 70px;gap:10px;align-items:center;font-size:13px;padding:5px 0}
+.nd i{display:block;height:6px;border-radius:3px;background:linear-gradient(90deg,var(--blue),var(--gold))}.nd b{text-align:right;font-weight:600}
+.sp{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));margin-top:14px}
+.sp small{color:var(--mute);font-size:11px;letter-spacing:.1em}
 .hidden{display:none}
 .check{display:flex;gap:8px;align-items:center;padding:5px 0}
 @media(max-width:520px){.search{flex-direction:column}.go{padding:14px}}
@@ -151,6 +155,7 @@ nav{overflow:visible;flex-wrap:wrap;white-space:normal;gap:4px}nav button{paddin
   <button role="tab" aria-selected="true" data-tab="search">Player lookup</button>
   <button role="tab" aria-selected="false" data-tab="compare">Compare players</button>
   <button role="tab" aria-selected="false" data-tab="adv">Gear Advisor</button>
+  <button role="tab" aria-selected="false" data-tab="plan">Planners</button>
   <button role="tab" aria-selected="false" data-tab="drops">Drop finder</button>
   <button role="tab" aria-selected="false" data-tab="lab">Upgrade Lab</button>
   <button role="tab" aria-selected="false" data-tab="info">Game Info</button>
@@ -205,7 +210,18 @@ nav{overflow:visible;flex-wrap:wrap;white-space:normal;gap:4px}nav button{paddin
 </section>
 <section id="adv" class="hidden">
   <div class="search"><input id="au" type="text" maxlength="32" placeholder="Enter a username to analyse" aria-label="Username" autocomplete="off"><button class="go" id="ago">ANALYSE</button></div>
+  <div class="fg2" style="max-width:900px"><label>Goal<select id="ag"><option value="dps">Damage (DPS)</option><option value="power">Power per day</option><option value="gold">Gold multiplier</option><option value="drops">Drops per day</option><option value="health">Health</option></select></label><label>Boss<select id="ab"><option value="0">Mordolith</option><option value="1">The Rival</option><option value="2">Reaper</option><option value="3">Dragon</option></select></label><label>Sort ideas by<select id="as"><option value="gain">Biggest gain</option><option value="hour">Gain per hour</option></select></label></div>
   <div id="amsg" aria-live="polite"></div><div id="aout"></div>
+</section>
+<section id="plan" class="hidden">
+  <div class="layers" id="players"><button class="on" data-l="room">Room planner</button><button data-l="level">Level planner</button></div>
+  <div id="P-room"><div class="card gold"><h3>Room planner</h3>
+   <div class="fg2"><label>Player 1<input id="rp0" type="text" maxlength="32"></label><label>Player 2<input id="rp1" type="text" maxlength="32"></label><label>Player 3<input id="rp2" type="text" maxlength="32"></label><label>Player 4<input id="rp3" type="text" maxlength="32"></label></div>
+   <div class="fg2"><label>Hours online 1<input id="rh0" type="number" min="0.5" max="24" step="0.5" value="24"></label><label>Hours online 2<input id="rh1" type="number" min="0.5" max="24" step="0.5" value="24"></label><label>Hours online 3<input id="rh2" type="number" min="0.5" max="24" step="0.5" value="24"></label><label>Hours online 4<input id="rh3" type="number" min="0.5" max="24" step="0.5" value="24"></label><label>Boss<select id="rb"><option value="0">Mordolith</option><option value="1">The Rival</option><option value="2">Reaper</option><option value="3">Dragon</option></select></label></div>
+   <button class="go" id="rgo" style="padding:10px 18px">SIMULATE</button><div id="rmsg" aria-live="polite"></div></div><div id="rout"></div></div>
+  <div id="P-level" class="hidden"><div class="card gold"><h3>Level planner</h3>
+   <div class="fg2"><label>Player<input id="lp" type="text" maxlength="32"></label><label>Boss<select id="lb"><option value="0">Mordolith</option><option value="1">The Rival</option><option value="2">Reaper</option><option value="3">Dragon</option></select></label><label>Hours per day<input id="lh" type="number" min="0.25" max="24" step="0.25" value="8"></label><label>Days<input id="ld" type="number" min="1" max="365" value="7"></label><label>Target level (optional)<input id="lt" type="number" min="1"></label><label>Looting level<select id="ll"><option value="">From gear</option><option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select></label></div>
+   <button class="go" id="lgo" style="padding:10px 18px">PLAN</button><div id="lmsg" aria-live="polite"></div></div><div id="lout"></div></div>
 </section>
 <section id="staff" class="hidden"></section>
 </main>
@@ -217,7 +233,7 @@ const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v)
 
 /* ---------- tabs ---------- */
 addEventListener('hashchange',()=>location.reload());
-const TABS=['search','compare','adv','drops','lab','info','staff'],nav=document.querySelector('nav');
+const TABS=['search','compare','adv','plan','drops','lab','info','staff'],nav=document.querySelector('nav');
 nav.insertAdjacentHTML('beforeend','<span class="ind"></span>');
 function moveInd(){const b=nav.querySelector('[aria-selected=true]'),i=nav.querySelector('.ind');i.style.left=b.offsetLeft+'px';i.style.width=b.offsetWidth+'px';i.style.top=(b.offsetTop+b.offsetHeight-2)+'px';}
 nav.querySelectorAll('button').forEach(b=>b.onclick=()=>{nav.querySelectorAll('button').forEach(x=>x.setAttribute('aria-selected',x===b));TABS.forEach(t=>$(t).classList.toggle('hidden',t!==b.dataset.tab));moveInd();});
@@ -516,15 +532,16 @@ $('go').onclick=lookup;$('u').addEventListener('keydown',e=>{if(e.key==='Enter')
 
 /* ---------- compare ---------- */
 const cnt=(o,k)=>Array.isArray(o[k])?o[k].length:0;
-const CR=[['Level',o=>+o.level||0,v=>v.toLocaleString()],['Power',o=>+o.power||0],['Damage per hit',o=>calc(o).dmg||0,v=>v?abbr(v):'—'],['DPS',o=>calc(o).dps||0,v=>v?abbr(v):'—'],['Gold',o=>+o.gold||0],['Max health',o=>+o.maxHealth||0],['Gold multiplier',o=>+o.goldMultiplier||0,v=>'x'+v],['Power multiplier',o=>+o.powerMultiplier||0,v=>'x'+v],['Attack speed',o=>+o.attackSpeed||0,v=>v.toFixed(2)],['Experience',o=>+o.experience||0],['Total kills',o=>Object.values(o.killedEnemyTypes||{}).reduce((t,v)=>t+(+v||0),0)],['Swords owned',o=>cnt(o,'swords'),v=>v],['Shields owned',o=>cnt(o,'shields'),v=>v],['Pets owned',o=>cnt(o,'pets'),v=>v]];
+const CR=[['Level',o=>+o.level||0,v=>v.toLocaleString()],['Power',o=>+o.power||0],['Damage per hit',o=>calc(o).dmg||0,v=>v?abbr(v):'Unknown gear'],['DPS',o=>calc(o).dps||0,v=>v?abbr(v):'Unknown gear'],['Gold',o=>+o.gold||0],['Max health',o=>+o.maxHealth||0],['Gold multiplier',o=>+o.goldMultiplier||0,v=>'x'+v],['Power multiplier',o=>+o.powerMultiplier||0,v=>'x'+v],['Attack speed',o=>+o.attackSpeed||0,v=>v.toFixed(2)],['Experience',o=>+o.experience||0],['Total kills',o=>Object.values(o.killedEnemyTypes||{}).reduce((t,v)=>t+(+v||0),0)],['Swords owned',o=>cnt(o,'swords'),v=>v],['Shields owned',o=>cnt(o,'shields'),v=>v],['Pets owned',o=>cnt(o,'pets'),v=>v]];
+const unkNote=(n,o)=>{const m=[];if(o.activeSword&&!byId('swords',o.activeSword.type))m.push('sword #'+o.activeSword.type);if(o.activeShield&&!byId('shields',o.activeShield.type))m.push('shield #'+o.activeShield.type);return m.length?`<p class="note">${esc(n)}'s ${m.join(' and ')} ${m.length>1?'are':'is'} not recognised yet, so damage cannot be calculated.</p>`:'';};
 async function compare(){
   const a=$('c1').value.trim(),b=$('c2').value.trim();$('cout').innerHTML='';
   if(!a||!b){$('cmsg').innerHTML='<div class="banner">Enter two usernames.</div>';return;}
   $('cgo').disabled=true;$('cmsg').innerHTML='<div class="loading"><div class="spin"></div>Looking up both players…</div>';
   try{const [x,y]=await Promise.all([getPlayer(a),getPlayer(b)]);let wa=0,wb=0;
-    const body=CR.map(([l,f,sh])=>{const p=f(x),q=f(y),w=p>q?1:q>p?2:0;if(w===1)wa++;if(w===2)wb++;const d=sh||abbr;return `<tr><td class="${w===1?'win':''}">${esc(d(p))}</td><th>${l}</th><td class="${w===2?'win':''}">${esc(d(q))}</td></tr>`;}).join('');
+    const body=CR.map(([l,f,sh])=>{const p=f(x),q=f(y),w=(l==='Damage per hit'||l==='DPS')&&(!p||!q)?0:p>q?1:q>p?2:0;if(w===1)wa++;if(w===2)wb++;const d=sh||abbr;return `<tr><td class="${w===1?'win':''}">${esc(d(p))}</td><th>${l}</th><td class="${w===2?'win':''}">${esc(d(q))}</td></tr>`;}).join('');
     $('cmsg').innerHTML='';
-    $('cout').innerHTML=`<div class="card" style="margin-top:18px"><h3>${esc(a)} vs ${esc(b)}</h3><table><tr><th>${esc(a)}</th><th></th><th>${esc(b)}</th></tr>${body}</table><p class="note">${esc(a)} leads ${wa} rows · ${esc(b)} leads ${wb}</p></div>`;
+    $('cout').innerHTML=`<div class="card" style="margin-top:18px"><h3>${esc(a)} vs ${esc(b)}</h3><table><tr><th>${esc(a)}</th><th></th><th>${esc(b)}</th></tr>${body}</table><p class="note">${esc(a)} leads ${wa} rows · ${esc(b)} leads ${wb}</p>${unkNote(a,x)}${unkNote(b,y)}</div>`;
   }catch(e){$('cmsg').innerHTML=`<div class="banner">${esc(e.message)}</div>`;}
   finally{$('cgo').disabled=false;}
 }
@@ -840,65 +857,169 @@ function paintClan(){
 /* ---------- gear advisor ---------- */
 const ADXP={Peppy:['XPeppy',1],'Blue Axolotl':['XAxolotl',2],Pengoo:['XPengoo',3],Leo:['XLeo',4],Phoenix:['XPhoenix',5],Octoo:['XOctoo',6],Xen:['XXen',7],Runix:['XRunix',19]};
 const ADLOOT=[1,1.6,2.2,2.8,3.4,4,4],ADTAG={SWAP:'#ffc83d',MERGE:'#38b6ff',ENCHANT:'#ff7a3d',PETS:'#3dffa0',ENHANCE:'#b36bff',TARGET:'#ff5db1'};
-const advStat=(sw,sl,fl,sh,hl,P,L)=>{const DS=sw.dmg*(1+.25*(sl-1)),MS=sh?sh.dm*(1+.25*(hl-1)):0,r=Math.sqrt(P),d=(DS+2*r+1)*(1+MS),f=fl?(2*r+DS)/(10-fl)*(1+MS):0,h=1+.5*Math.pow(L,1/8);return {dmg:d,dps:d*h+f};};
 const advPc=(a,b)=>b>0?(a/b-1)*100:0;
 const advOdds=(n,L,F)=>{const e=EN.find(x=>x[0]===n),t=Math.max(0,Math.min(1,(L-2000)/18000));let c=e[2].map((v,i)=>v+(e[3][i]-v)*t);const mv=c[0]*.05*F,sm=c[1]+c[2]+c[3];return [c[0]-mv,...[1,2,3].map(i=>c[i]+mv*c[i]/sm)];};
 const adEn=(o,t)=>{const e=o&&(o.enchantments||[]).find(x=>x.type===t);return e?e.level:0;};
-function advAnalyze(inv){
-  const P=+inv.power||0,L=+inv.level||0,pm=+inv.powerMultiplier||1,rec=[],aS=inv.activeSword,aH=inv.activeShield;
+/* ---------- shared planner maths ---------- */
+const PLB=[['Mordolith',28,5e14,6.15,3e11],['The Rival',25,1e14,6.15,1.5e11],['Reaper',22,3e12,6.15,5e9],['Dragon',21,1e11,11.15,2e7]];
+function plKill(hp,N,Fl){if(!(N>0))return Infinity;for(let k=0;k<20000;k++){const f=Fl*Math.max(0,k-1);if(N*k+f>=hp)return k;const t=(hp-f)/N;if(t<k+1)return t;}return Infinity;}
+const plT=x=>!isFinite(x)?'—':x<90?Math.round(x)+' s':x<5400?Math.round(x/60)+' min':x<172800?(x/3600).toFixed(1)+' h':(x/86400).toFixed(1)+' days';
+function plAcct(inv,P,L){
+  const aS=inv.activeSword,aH=inv.activeShield,sI=aS&&byId('swords',aS.type),hI=aH&&byId('shields',aH.type);
+  if(!sI||(aH&&!hI))return null;
+  const DS=sI.dmg*sc(aS),MS=hI?hI.dm*sc(aH):0,r=Math.sqrt(P),dmg=(DS+2*r+1)*(1+MS),hits=1+.5*Math.pow(L,1/8),fl=adEn(aS,0);
+  const Fl=fl?(2*r+DS)/(10-fl)*(1+MS):0;
+  return {dmg,hits,N:dmg*hits,Fl,pm:+inv.powerMultiplier||1,loot:Math.min(6,adEn(aS,2)+adEn(aH,2))};
+}
+function plGroup(ac,hp,dt){
+  const N=ac.reduce((t,a)=>t+a.N,0),Fl=ac.reduce((t,a)=>t+a.Fl,0),t=plKill(hp,N,Fl);if(!isFinite(t))return null;
+  const fk=Math.max(0,Math.floor(t)-1),d=ac.map(a=>a.N*t+a.Fl*fk),tot=d.reduce((x,y)=>x+y,0);
+  return {t,cycle:t+dt,shares:d.map(x=>x/tot)};
+}
+function plDay(ac,hrs,B){
+  const hp=B[2],dt=B[3],kg=B[4],cuts=[...new Set(hrs.map(h=>Math.max(0,Math.min(24,h))))].sort((a,b)=>a-b),res=ac.map(()=>({kills:0,power:0,gold:0}));let prev=0,kills=0;
+  cuts.forEach(c=>{if(c<=prev)return;const act=ac.map((a,i)=>hrs[i]>prev?i:-1).filter(i=>i>=0),g=act.length&&plGroup(act.map(i=>ac[i]),hp,dt);
+    if(g){const kc=(c-prev)*3600/g.cycle;kills+=kc;act.forEach((i,j)=>{res[i].kills+=kc;res[i].power+=kc*hp*g.shares[j]*ac[i].pm;res[i].gold+=kc*kg*g.shares[j];});}prev=c;});
+  return {res,kills};
+}
+const dropList=B=>ENEMIES[B[1]].sw.concat(ENEMIES[B[1]].sh).map(d=>({n:d.n,c:parseFloat(d.c)||0}));
+const dropSum=B=>dropList(B).reduce((t,d)=>t+d.c,0)/100;
+const dnum=v=>v>=100?Math.round(v).toLocaleString():v>=1?v.toFixed(1):v>=0.001?v.toFixed(3):v>0?'<0.001':'0';
+const spark=(v,c)=>{const w=300,h=76,mn=Math.min(...v),mx=Math.max(...v),r=(mx-mn)||1;return `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" style="width:100%;height:84px;margin-top:8px"><polyline points="${v.map((y,i)=>((i/((v.length-1)||1))*w).toFixed(1)+','+(h-5-(y-mn)/r*(h-10)).toFixed(1)).join(' ')}" fill="none" stroke="${c}" stroke-width="2.2" stroke-linejoin="round" vector-effect="non-scaling-stroke"/></svg>`;};
+
+/* ---------- gear advisor ---------- */
+const GOALS={dps:'Damage (DPS)',power:'Power per day',gold:'Gold multiplier',drops:'Drops per day',health:'Health'};
+const gUnit={dps:'DPS',power:'POWER/DAY',gold:'GEAR GOLD',drops:'DROPS/DAY',health:'GEAR HEALTH'};
+const gFmt=(g,v)=>g==='gold'||g==='health'?'x'+(+v.toFixed(2)):g==='drops'?dnum(v):abbr(v);
+function advEval(goal,B,cx,S,Sl,Sf,Sk,H,Hl,Hk){
+  const ss=1+.25*(Sl-1),hs=1+.25*(Hl-1);
+  if(goal==='gold')return S.gold*ss+(H?H.gold*hs:0);
+  if(goal==='health')return S.hp*ss+(H?H.hp*hs:0);
+  const DS=S.dmg*ss,MS=H?H.dm*hs:0,r=Math.sqrt(cx.P),dmg=(DS+2*r+1)*(1+MS),hits=1+.5*Math.pow(cx.L,1/8),Fl=Sf?(2*r+DS)/(10-Sf)*(1+MS):0;
+  if(goal==='dps')return dmg*hits+Fl;
+  const t=plKill(B[2],dmg*hits,Fl);if(!isFinite(t))return 0;const kd=86400/(t+B[3]);
+  return goal==='power'?kd*B[2]*cx.pm:kd*ADLOOT[Math.min(6,Sk+Hk)]*dropSum(B);
+}
+function advAnalyze(inv,goal,bi,sortBy){
+  const B=PLB[bi],P=+inv.power||0,L=+inv.level||0,pm=+inv.powerMultiplier||1,cx={P,L,pm},aS=inv.activeSword,aH=inv.activeShield;
   const sI=aS&&byId('swords',aS.type),hI=aH&&byId('shields',aH.type),ok=!!sI&&(!aH||!!hI),hl=aH?aH.level:1,F=adEn(aH,4);
-  const cur=ok?advStat(sI,aS.level,adEn(aS,0),hI,hl,P,L):null,res={cur,best:null,ok};
-  const uq=(l,k)=>{const m=new Map();(l||[]).forEach(o=>{const it=byId(k,o.type);const key=o.type+'|'+o.level+'|'+JSON.stringify(o.enchantments||[]);if(it&&!m.has(key))m.set(key,{o,it});});return [...m.values()];};
-  const OS=uq(inv.swords,'swords'),OH=uq(inv.shields,'shields'),HH=OH.length?OH:[{o:null,it:null}];
-  let best=null;OS.forEach(s=>HH.forEach(h=>{const r=advStat(s.it,s.o.level,adEn(s.o,0),h.it,h.o?h.o.level:1,P,L);if(!best||r.dps>best.dps)best={s,h,...r};}));res.best=best;
-  if(cur&&best&&best.dps>cur.dps*1.0005)rec.push({tag:'SWAP',title:`Equip ${best.s.it.n} Lv ${best.s.o.level}${best.h.it?' with '+best.h.it.n+' Lv '+best.h.o.level:''}`,text:'The strongest sword and shield combination you already own.',gain:advPc(best.dps,cur.dps),unit:'DPS'});
+  const E=(S,Sl,Sf,Sk,H,Hl,Hk,c=cx)=>advEval(goal,B,c,S,Sl,Sf,Sk,H,Hl,Hk);
+  const cur=ok?E(sI,aS.level,adEn(aS,0),adEn(aS,2),hI,hl,adEn(aH,2)):null,rec=[],res={ok,cur,goal,B,rec,pairs:[],needle:[]};
+  const uq=(l,k)=>{const m=new Map();(l||[]).forEach(o=>{const it=byId(k,o.type),key=o.type+'|'+o.level+'|'+JSON.stringify(o.enchantments||[]);if(it&&!m.has(key))m.set(key,{o,it});});return [...m.values()];};
+  const OS=uq(inv.swords,'swords'),OH=uq(inv.shields,'shields'),HH=OH.length?OH:[{o:null,it:null}],prs=[];
+  OS.forEach(s=>HH.forEach(h=>prs.push({s,h,v:E(s.it,s.o.level,adEn(s.o,0),adEn(s.o,2),h.it,h.o?h.o.level:1,adEn(h.o,2))})));
+  prs.sort((a,b)=>b.v-a.v);res.pairs=prs.slice(0,5);const best=prs[0];
+  const ac=ok?plAcct(inv,P,L):null,gu=gUnit[goal];
+  if(cur&&best&&best.v>cur*1.0005)rec.push({tag:'SWAP',ready:1,title:`Equip ${best.s.it.n} Lv ${best.s.o.level}${best.h.it?' with '+best.h.it.n+' Lv '+best.h.o.level:''}`,text:'The strongest sword and shield combination you already own for this goal.',gain:advPc(best.v,cur),unit:gu});
   if(cur){
     const grp=(l,k)=>{const m=new Map();(l||[]).forEach(o=>{const it=byId(k,o.type);if(!it)return;const key=o.type+'|'+o.level,g=m.get(key)||{o,it,n:0};g.n++;m.set(key,g);});return [...m.values()];};
-    const tryM=(g,k)=>{const need=g.o.level+1;if(g.n<need-2)return;const isEq=k==='swords'?(aS&&aS.type===g.o.type&&aS.level===g.o.level):(aH&&aH.type===g.o.type&&aH.level===g.o.level);
-      const r=k==='swords'?advStat(g.it,g.o.level+1,isEq?adEn(aS,0):0,hI,hl,P,L):advStat(sI,aS.level,adEn(aS,0),g.it,g.o.level+1,P,L);const gain=advPc(r.dps,cur.dps);if(gain<0.05)return;
-      rec.push({tag:'MERGE',title:`${g.it.n}: Lv ${g.o.level} to Lv ${g.o.level+1}`,text:g.n>=need?`You have ${g.n} of the ${need} needed. Merge them now.`:`You have ${g.n} of the ${need} needed.`,gain,unit:'DPS'});};
-    grp(inv.swords,'swords').forEach(g=>tryM(g,'swords'));grp(inv.shields,'shields').forEach(g=>tryM(g,'shields'));
-    const f=adEn(aS,0);if(f<3){const r=advStat(sI,aS.level,3,hI,hl,P,L),o=advOdds('Flame',L,F);rec.push({tag:'ENCHANT',title:f?'Raise Flame to Level III':'Add Flame to your sword',text:`Level III chance per try is ${+o[3].toFixed(2)}% at your level.`,gain:advPc(r.dps,cur.dps),unit:'DPS'});}
-    const lt=Math.min(6,adEn(aS,2)+adEn(aH,2));if(lt<6)rec.push({tag:'ENCHANT',title:'Add or raise Looting',text:`Drop rates go from x${ADLOOT[lt]} to x${ADLOOT[lt+1]} for each extra total level.`,gain:ADLOOT[lt+1]/ADLOOT[lt]*100-100,unit:'DROPS'});
+    const merge=(g,k)=>{const need=g.o.level+1;if(g.n<need-2)return;const eq=k==='swords'?(aS.type===g.o.type&&aS.level===g.o.level):(aH&&aH.type===g.o.type&&aH.level===g.o.level),en=eq?(k==='swords'?aS:aH):g.o;
+      const v=k==='swords'?E(g.it,g.o.level+1,adEn(en,0),adEn(en,2),hI,hl,adEn(aH,2)):E(sI,aS.level,adEn(aS,0),adEn(aS,2),g.it,g.o.level+1,adEn(en,2)),gain=advPc(v,cur);if(gain<0.05)return;
+      rec.push({tag:'MERGE',ready:g.n>=need?1:0,title:`${g.it.n}: Lv ${g.o.level} to Lv ${g.o.level+1}`,text:g.n>=need?`You have ${g.n} of the ${need} needed. Merge them now.`:`You have ${g.n} of the ${need} needed.`,gain,unit:gu});};
+    grp(inv.swords,'swords').forEach(g=>merge(g,'swords'));grp(inv.shields,'shields').forEach(g=>merge(g,'shields'));
+    const f=adEn(aS,0),lt=Math.min(6,adEn(aS,2)+adEn(aH,2));
+    if(f<3&&(goal==='dps'||goal==='power')){const v=E(sI,aS.level,3,adEn(aS,2),hI,hl,adEn(aH,2)),o=advOdds('Flame',L,F);rec.push({tag:'ENCHANT',title:f?'Raise Flame to Level III':'Add Flame to your sword',text:`Level III chance per try is ${+o[3].toFixed(2)}% at your level.`,gain:advPc(v,cur),unit:gu});}
+    if(lt<6){const v=E(sI,aS.level,f,adEn(aS,2)+1>6?6:adEn(aS,2)+1,hI,hl,adEn(aH,2)),g2=goal==='drops'?advPc(v,cur):ADLOOT[lt+1]/ADLOOT[lt]*100-100;rec.push({tag:'ENCHANT',title:'Add or raise Looting',text:`Drop rates go from x${ADLOOT[lt]} to x${ADLOOT[lt+1]} for each extra total level.`,gain:g2,unit:'DROPS'});}
     if(!adEn(aS,3))rec.push({tag:'ENCHANT',title:'Add Freeze to your sword',text:'Slows enemies by 75% for as many seconds as the level. It adds no damage.',gain:null});
     if(aH&&!adEn(aH,1))rec.push({tag:'ENCHANT',title:'Add Thorns to your shield',text:'Reflects 1% of a mob\'s health per level back as power.',gain:null});
     if(aH&&!adEn(aH,4))rec.push({tag:'ENCHANT',title:'Add Fortune to your shield',text:'Adds 5% per level to NPC success chances.',gain:null});
-    const owned=new Set((inv.swords||[]).map(o=>o.type)),ownedH=new Set((inv.shields||[]).map(o=>o.type));
-    const base=advStat(sI,aS.level,0,hI,hl,P,L).dps;
-    const tgt=(L2,k,mk)=>{const c=L2.filter(x=>!(k==='swords'?owned:ownedH).has(Object.keys(IDMAP[k]).find(t=>IDMAP[k][t]===x.n))).map(x=>({x,d:mk(x).dps})).filter(z=>z.d>base*1.02).sort((a,b)=>a.d-b.d);
+    // goals you can still reach
+    const ownS=new Set(),ownH=new Set();(inv.swords||[]).forEach(o=>{const i=byId('swords',o.type);i&&ownS.add(i.n);});(inv.shields||[]).forEach(o=>{const i=byId('shields',o.type);i&&ownH.add(i.n);});
+    const farm=(name)=>{const src=dropsOf(name)[0];if(!src||!ac||!src[2])return null;const e=ENEMIES[src[1]],t=plKill(e.hp,ac.N,ac.Fl),cyc=t+ERESP[src[1]]+1.15,kills=100/(parseFloat(src[2])*ADLOOT[ac.loot]);return {kills,hours:kills*cyc/3600,src};};
+    const tg=(L2,k)=>{const own=k==='swords'?ownS:ownH;const c=L2.filter(x=>!own.has(x.n)).map(x=>{
+        const pot=k==='swords'?E(x,aS.level,adEn(aS,0),adEn(aS,2),hI,hl,adEn(aH,2)):E(sI,aS.level,adEn(aS,0),adEn(aS,2),x,aH?aH.level:1,adEn(aH,2));
+        const now=k==='swords'?E(x,1,0,0,hI,hl,adEn(aH,2)):E(sI,aS.level,adEn(aS,0),adEn(aS,2),x,1,0);return {x,pot,now,g:advPc(pot,cur)};}).filter(z=>z.g>1).sort((a,b)=>a.g-b.g);
       if(!c.length)return;const pick=[c[0]];if(c[c.length-1]!==c[0])pick.push(c[c.length-1]);
-      pick.forEach((z,i)=>{const src=dropsOf(z.x.n),sr=src.length?`Drops from ${src[0][0]} (${src[0][2]||'?'}%).`:ELFI.includes(z.x.n)?'Bought from the Elf.':'';
-        rec.push({tag:'TARGET',title:`${i?'Best goal':'Next step'}: ${z.x.n}`,text:`${sr} Compared before enchants and merging, at Lv 1.`,gain:advPc(z.d,base),unit:'DPS'});});};
-    tgt(SWORDS,'swords',x=>advStat(x,1,0,hI,hl,P,L));tgt(SHIELDS,'shields',x=>advStat(sI,aS.level,0,x,1,P,L));
+      pick.forEach((z,i)=>{const fm=farm(z.x.n),src=dropsOf(z.x.n)[0],sr=src?`Drops from ${src[0]} (${src[2]||'?'}%).`:ELFI.includes(z.x.n)?'Bought from the Elf.':'';
+        rec.push({tag:'TARGET',title:`${i?'Best goal':'Next step'}: ${z.x.n}`,text:`${sr} At Lv 1 it is ${advPc(z.now,cur)>=0?'+':''}${advPc(z.now,cur).toFixed(1)}% vs what you wear now; levelled to Lv ${k==='swords'?aS.level:aH?aH.level:1} with your enchants it is +${z.g.toFixed(1)}%.${fm?` Expect ~${dnum(fm.kills)} kills (${plT(fm.hours*3600)}).`:''}`,gain:z.g,unit:gu,hours:fm?fm.hours:null});});};
+    tg(SWORDS,'swords');tg(SHIELDS,'shields');
+    // what moves the needle
+    const nd=[],add=(l,v)=>nd.push([l,advPc(v,cur)]);
+    add('Sword +1 level',E(sI,aS.level+1,f,adEn(aS,2),hI,hl,adEn(aH,2)));
+    add('Shield +1 level',hI?E(sI,aS.level,f,adEn(aS,2),hI,hl+1,adEn(aH,2)):cur);
+    add('Power +10%',E(sI,aS.level,f,adEn(aS,2),hI,hl,adEn(aH,2),{...cx,P:P*1.1}));
+    add('Flame +1 level',f<3?E(sI,aS.level,f+1,adEn(aS,2),hI,hl,adEn(aH,2)):cur);
+    add('Looting +1 level',lt<6?E(sI,aS.level,f,adEn(aS,2)+1,hI,hl,adEn(aH,2)):cur);
+    add('Pet power +1x',E(sI,aS.level,f,adEn(aS,2),hI,hl,adEn(aH,2),{...cx,pm:pm+1}));
+    res.needle=nd;
   }
   const pets=(inv.pets||[]).map(o=>({o,it:byId('pets',o.type)})).filter(x=>x.it),act=(inv.activePets||[]).map(p=>byId('pets',p.type));
   if(pets.length>=3&&act.length&&act.every(Boolean)){const top=[...pets].sort((a,b)=>b.it.pow-a.it.pow).slice(0,3),s1=act.reduce((t,p)=>t+p.pow,0),s2=top.reduce((t,x)=>t+x.it.pow,0);
-    if(s2>s1+1e-9)rec.push({tag:'PETS',title:'Equip '+top.map(x=>x.it.n).join(', '),text:`Pet power multipliers add up to ${+s2.toFixed(2)} instead of ${+s1.toFixed(2)}.`,gain:advPc(pm-s1+s2,pm),unit:'POWER'});}
-  const cnt=new Map();pets.forEach(p=>cnt.set(p.it.n,(cnt.get(p.it.n)||0)+1));
-  const tier=TIER.find(x=>L<=x[0])[1];
-  cnt.forEach((n,name)=>{const x=ADXP[name];if(!x||n<10)return;const free=Math.min(100,tier/x[1]*(1+.05*F)),att=Math.floor(n/10);
-    rec.push({tag:'ENHANCE',title:`${n} x ${name}: ${att} attempt${att>1?'s':''} at the Pet Enhancer`,text:`Makes ${x[0]}. Free chance ${+free.toFixed(2)}%, paid ${+Math.min(100,free*3).toFixed(2)}%.`,gain:null});});
-  const ord={SWAP:0,MERGE:1,ENCHANT:2,PETS:3,ENHANCE:4,TARGET:5};
-  rec.sort((a,b)=>(a.tag==='SWAP'?-1:0)-(b.tag==='SWAP'?-1:0)||((b.gain==null?-1:b.gain)-(a.gain==null?-1:a.gain))||ord[a.tag]-ord[b.tag]);
-  res.rec=rec;return res;
+    if(s2>s1+1e-9)rec.push({tag:'PETS',ready:1,title:'Equip '+top.map(x=>x.it.n).join(', '),text:`Pet power multipliers add up to ${+s2.toFixed(2)} instead of ${+s1.toFixed(2)}.`,gain:advPc(pm-s1+s2,pm),unit:'POWER'});}
+  const cnt=new Map();pets.forEach(p=>cnt.set(p.it.n,(cnt.get(p.it.n)||0)+1));const tier=TIER.find(x=>L<=x[0])[1];
+  cnt.forEach((n,name)=>{const x=ADXP[name];if(!x||n<10)return;const fr=Math.min(100,tier/x[1]*(1+.05*F)),at=Math.floor(n/10);
+    rec.push({tag:'ENHANCE',ready:1,title:`${n} x ${name}: ${at} attempt${at>1?'s':''} at the Pet Enhancer`,text:`Makes ${x[0]}. Free chance ${+fr.toFixed(2)}%, paid ${+Math.min(100,fr*3).toFixed(2)}%.`,gain:null});});
+  const ord={SWAP:0,MERGE:1,ENCHANT:2,PETS:3,ENHANCE:4,TARGET:5},sc2=r=>sortBy==='hour'?(r.hours?r.gain/Math.max(.05,r.hours):r.ready&&r.gain!=null?1e9+r.gain:-1):(r.gain==null?-1:r.gain);
+  rec.sort((a,b)=>(b.ready||0)-(a.ready||0)||sc2(b)-sc2(a)||ord[a.tag]-ord[b.tag]);
+  return res;
 }
-function advHtml(inv){
-  const a=advAnalyze(inv);
-  const tiles=a.cur?minis([['CURRENT DPS',abbr(a.cur.dps),full(a.cur.dps)],['BEST OWNED SETUP',abbr(a.best.dps),full(a.best.dps)],['POSSIBLE GAIN',a.best.dps>a.cur.dps*1.0005?'+'+(advPc(a.best.dps,a.cur.dps)).toFixed(1)+'%':'Already best'],['IDEAS',a.rec.length]]):'';
-  const list=a.rec.map(r=>`<div class="rc" style="--c:${ADTAG[r.tag]}"><div><div class="tg">${r.tag}</div><div class="rt">${esc(r.title)}</div><p>${esc(r.text)}</p></div>${r.gain==null?'':`<div class="gv">${r.gain>=0?'+':''}${Math.abs(r.gain)<10?r.gain.toFixed(1):Math.round(r.gain)}%<small>${r.unit}</small></div>`}</div>`).join('');
-  const note=a.ok?'':'<p class="empty" style="margin-top:12px">Some of this player\'s gear is not recognised yet, so damage-based advice is limited.</p>';
-  return `<div class="card gold" style="margin-top:14px"><h3>Upgrade advisor</h3>${tiles}${note}<div class="recs">${list||'<p class="empty">Nothing to suggest right now.</p>'}</div></div>`;
+function advHtml(inv,goal,bi,sortBy){
+  const a=advAnalyze(inv,goal,bi,sortBy),best=a.pairs[0];
+  const tiles=a.cur!=null&&best?minis([['CURRENT',gFmt(goal,a.cur)],['BEST OWNED SETUP',gFmt(goal,best.v)],['POSSIBLE GAIN',best.v>a.cur*1.0005?'+'+advPc(best.v,a.cur).toFixed(1)+'%':'Already best'],['IDEAS',a.rec.length]]):'';
+  const list=a.rec.map(r=>`<div class="rc" style="--c:${ADTAG[r.tag]}"><div><div class="tg">${r.tag}${r.ready?' · READY NOW':''}</div><div class="rt">${esc(r.title)}</div><p>${esc(r.text)}</p></div>${r.gain==null?'':`<div class="gv">${r.gain>=0?'+':''}${Math.abs(r.gain)<10?r.gain.toFixed(1):Math.round(r.gain)}%<small>${r.unit}</small></div>`}</div>`).join('');
+  const nmax=Math.max(.0001,...a.needle.map(n=>Math.abs(n[1])));
+  const nd=a.needle.length?`<h4>WHAT MOVES THE NEEDLE · ${esc(GOALS[goal].toUpperCase())}</h4>${a.needle.map(([l,g])=>`<div class="nd"><span>${l}</span><div><i style="width:${Math.max(0,Math.abs(g)/nmax*100)}%"></i></div><b>${g>0.005?'+'+(g<10?g.toFixed(1):Math.round(g))+'%':'—'}</b></div>`).join('')}`:'';
+  const lab=(x,k)=>x.it?`${esc(x.it.n)} Lv ${x.o.level}${k==='s'&&adEn(x.o,0)?' · Flame '+ROM[adEn(x.o,0)]:''}`:'None';
+  const pt=a.pairs.length?`<h4>BEST OWNED PAIRS FOR THIS GOAL</h4><div class="tbl" style="max-height:none"><table><tr><th>#</th><th>Sword</th><th>Shield</th><th>${gUnit[goal]}</th></tr>${a.pairs.map((p,i)=>`<tr><td>${i+1}</td><td>${lab(p.s,'s')}</td><td>${lab(p.h,'h')}</td><td>${gFmt(goal,p.v)}</td></tr>`).join('')}</table></div>`:'';
+  const note=a.ok?'':'<p class="empty" style="margin-top:12px">Some of this player\'s gear is not recognised yet, so gear-based advice is limited.</p>';
+  return `<div class="card gold" style="margin-top:14px"><h3>Upgrade advisor</h3>${tiles}${note}${nd}${pt}<h4>RECOMMENDATIONS</h4><div class="recs">${list||'<p class="empty">Nothing to suggest right now.</p>'}</div></div>`;
+}
+let ADVINV=null,ADVNAME='';
+function paintAdvisor(){
+  if(!ADVINV)return;MAPUI=false;const mk='<div class="card" style="margin-top:14px"><h3>Inventory</h3>',h=buildProfile(ADVINV,ADVNAME,false);
+  $('aout').innerHTML=h.replace(mk,advHtml(ADVINV,$('ag').value,+$('ab').value,$('as').value)+mk);
 }
 async function runAdvisor(){
   const n=$('au').value.trim();$('aout').innerHTML='';
   if(!n){$('amsg').innerHTML='<div class="banner">Enter a username first.</div>';return;}
   $('ago').disabled=true;$('amsg').innerHTML='<div class="loading"><div class="spin"></div>Analysing…</div>';
-  try{const inv=await getPlayer(n);MAPUI=false;const mk='<div class="card" style="margin-top:14px"><h3>Inventory</h3>',h=buildProfile(inv,n,false);
-    $('amsg').innerHTML='';$('aout').innerHTML=h.replace(mk,advHtml(inv)+mk);}
+  try{ADVINV=await getPlayer(n);ADVNAME=n;$('amsg').innerHTML='';paintAdvisor();}
   catch(e){$('amsg').innerHTML=`<div class="banner">${esc(e.message)}</div>`;}finally{$('ago').disabled=false;}
 }
 $('ago').onclick=runAdvisor;$('au').addEventListener('keydown',e=>{if(e.key==='Enter')runAdvisor();});
+['ag','ab','as'].forEach(i=>$(i).onchange=paintAdvisor);
 
+/* ---------- planners ---------- */
+document.querySelectorAll('#players button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#players button').forEach(x=>x.classList.toggle('on',x===b));['room','level'].forEach(l=>$('P-'+l).classList.toggle('hidden',l!==b.dataset.l));});
+async function roomRun(){
+  const names=[0,1,2,3].map(i=>$('rp'+i).value.trim()),idx=names.map((n,i)=>n?i:-1).filter(i=>i>=0);
+  if(!idx.length){$('rmsg').innerHTML='<div class="banner">Enter at least one username.</div>';return;}
+  $('rgo').disabled=true;$('rmsg').innerHTML='<div class="loading"><div class="spin"></div>Loading players…</div>';$('rout').innerHTML='';
+  const rs=await Promise.allSettled(idx.map(i=>getPlayer(names[i]))),ok=[],bad=[];
+  rs.forEach((r,k)=>{const i=idx[k];if(r.status!=='fulfilled'){bad.push(r.reason&&r.reason.message||names[i]+': failed');return;}
+    const a=plAcct(r.value,+r.value.power||0,+r.value.level||0);if(!a){bad.push(names[i]+': gear not recognised yet');return;}
+    ok.push({name:names[i],a,inv:r.value,h:Math.max(.5,Math.min(24,+$('rh'+i).value||24))});});
+  $('rmsg').innerHTML=bad.length?`<div class="banner">${bad.map(esc).join('<br>')}</div>`:'';$('rgo').disabled=false;if(!ok.length)return;
+  const B=PLB[+$('rb').value],ac=ok.map(o=>o.a),hrs=ok.map(o=>o.h),day=plDay(ac,hrs,B),g=plGroup(ac,B[2],B[3]),ds=dropSum(B),tot=day.res.reduce((t,r)=>t+r.power,0);
+  const rows=ok.map((o,i)=>{const r=day.res[i],solo=plDay([o.a],[o.h],B).res[0],dr=r.kills*ds*ADLOOT[o.a.loot];
+    return `<tr><td>${esc(o.name)}</td><td>${o.h}h</td><td>${(g.shares[i]*100).toFixed(1)}%</td><td>${abbr(r.power)}</td><td>${advPc(r.power,solo.power)>=0?'+':''}${advPc(r.power,solo.power).toFixed(0)}%</td><td>${dnum(dr)}</td><td>${abbr(r.gold)}</td></tr>`;}).join('');
+  const bt=PLB.map(b=>{const d=plDay(ac,hrs,b),gg=plGroup(ac,b[2],b[3]),p=d.res.reduce((t,r)=>t+r.power,0);return [b[0],gg?gg.t:Infinity,d.kills,p];}),bm=Math.max(...bt.map(x=>x[3]));
+  const lst=dropList(B),dt=lst.length?`<h4>EXPECTED DROPS PER DAY · ${B[0].toUpperCase()}</h4><div class="tbl" style="max-height:none"><table><tr><th>Item</th>${ok.map(o=>`<th>${esc(o.name)}</th>`).join('')}</tr>${lst.map(d=>`<tr><td style="color:${GL[rarOf(d.n)]}">${esc(d.n)} (${d.c}%)</td>${ok.map((o,i)=>`<td>${dnum(day.res[i].kills*d.c/100*ADLOOT[o.a.loot])}</td>`).join('')}</tr>`).join('')}</table></div>`:'';
+  $('rout').innerHTML=`<div class="card" style="margin-top:14px"><h3>${esc(B[0])} room · ${ok.length} player${ok.length>1?'s':''}</h3>${minis([['KILL TIME',plT(g.t)],['KILLS PER DAY',Math.floor(day.kills).toLocaleString()],['GROUP POWER PER DAY',abbr(tot)],['KILL GOLD PER DAY',abbr(day.res.reduce((t,r)=>t+r.gold,0))]])}
+   <h4>PER PLAYER</h4><div class="tbl" style="max-height:none"><table><tr><th>Player</th><th>Online</th><th>Damage share</th><th>Power per day</th><th>vs playing alone</th><th>Drops per day</th><th>Kill gold per day</th></tr>${rows}</table></div>${dt}
+   <h4>ALL BOSSES FOR THIS GROUP</h4><div class="tbl" style="max-height:none"><table><tr><th>Boss</th><th>Kill time</th><th>Kills per day</th><th>Group power per day</th></tr>${bt.map(x=>`<tr${x[3]===bm?' class="win"':''}><td>${x[0]}</td><td>${plT(x[1])}</td><td>${Math.floor(x[2]).toLocaleString()}</td><td>${abbr(x[3])}</td></tr>`).join('')}</table></div></div>`;
+}
+$('rgo').onclick=roomRun;
+function levelDays(inv,B,H,T,P0,L0,xp0,pmv){let P=P0,L=L0,xp=xp0;for(let d=1;d<=3650;d++){for(let q=0;q<4;q++){const a=plAcct(inv,P,L),g=a&&plGroup([a],B[2],B[3]);if(!g)return null;const kc=H*900/g.cycle;xp+=kc*B[2]*(L>=1000?.5:1);P+=kc*B[2]*a.pm;L=Math.max(L,Math.floor(Math.pow(xp,.25)));}if(L>=T)return {days:d,hours:d*H};}return null;}
+async function levelRun(){
+  const n=$('lp').value.trim();if(!n){$('lmsg').innerHTML='<div class="banner">Enter a username first.</div>';return;}
+  $('lgo').disabled=true;$('lmsg').innerHTML='<div class="loading"><div class="spin"></div>Planning…</div>';$('lout').innerHTML='';
+  try{
+    const inv=await getPlayer(n),P0=+inv.power||0,L0=+inv.level||0,xp0=+inv.experience||Math.pow(L0,4),a0=plAcct(inv,P0,L0);
+    if(!a0){$('lmsg').innerHTML='<div class="banner">This player\'s gear is not recognised yet, so the plan cannot be calculated.</div>';return;}
+    const B=PLB[+$('lb').value],H=Math.max(.25,Math.min(24,+$('lh').value||8)),D=Math.max(1,Math.min(365,+$('ld').value||7)),T=+$('lt').value||0,lo=$('ll').value,loot=lo===''?a0.loot:+lo;
+    let P=P0,xp=xp0,L=L0,kills=0,gold=0;const steps=Math.min(192,D*4),ss=H*3600*D/steps,lv=[L],pw=[P];
+    for(let s=0;s<steps;s++){const a=plAcct(inv,P,L),g=a&&plGroup([a],B[2],B[3]);if(!g)break;const kc=ss/g.cycle;kills+=kc;xp+=kc*B[2]*(L>=1000?.5:1);P+=kc*B[2]*a.pm;gold+=kc*B[4];L=Math.max(L,Math.floor(Math.pow(xp,.25)));lv.push(L);pw.push(P);}
+    const a1=plAcct(inv,P,L),lst=dropList(B);let tg='';
+    if(T){const r=T<=L0?{days:0,hours:0}:levelDays(inv,B,H,T,P0,L0,xp0);tg=minis([['TARGET LEVEL',T.toLocaleString()],['TIME NEEDED',r?(r.days?r.days+' day'+(r.days>1?'s':'')+' · '+r.hours.toFixed(r.hours%1?1:0)+' h of grinding':'Already there'):'More than 10 years']]);}
+    $('lmsg').innerHTML='';
+    $('lout').innerHTML=`<div class="card" style="margin-top:14px"><h3>${esc(n)} · ${D} day${D>1?'s':''} × ${H} h on ${esc(B[0])}</h3>${minis([['LEVEL',L0.toLocaleString()+' to '+L.toLocaleString()],['LEVELS GAINED','+'+(L-L0).toLocaleString()],['POWER',abbr(P0)+' to '+abbr(P)],['POWER GROWTH','+'+advPc(P,P0).toFixed(1)+'%'],['KILLS',Math.floor(kills).toLocaleString()],['KILL GOLD',abbr(gold)],['DPS',abbr(a0.dmg*a0.hits+a0.Fl)+' to '+abbr(a1.dmg*a1.hits+a1.Fl)]])}${tg}
+     <div class="sp"><div class="card"><small>LEVEL OVER TIME</small>${spark(lv,'#3dffa0')}</div><div class="card"><small>POWER OVER TIME</small>${spark(pw,'#38b6ff')}</div></div>
+     <h4>EXPECTED DROPS · LOOTING ${loot} (x${ADLOOT[loot]})</h4><div class="tbl" style="max-height:none"><table><tr><th>Item</th><th>Chance per kill</th><th>Expected</th><th>One every</th></tr>${lst.map(d=>{const e=kills*d.c/100*ADLOOT[loot];return `<tr><td style="color:${GL[rarOf(d.n)]}">${esc(d.n)}</td><td>${d.c}%</td><td>${dnum(e)}</td><td>${dnum(100/(d.c*ADLOOT[loot]))} kills</td></tr>`;}).join('')}</table></div>
+     <p class="note">XP counts damage dealt, and power grows by damage times your power multiplier. Damage is recalculated as your power and level grow.</p></div>`;
+  }catch(e){$('lmsg').innerHTML=`<div class="banner">${esc(e.message)}</div>`;}finally{$('lgo').disabled=false;}
+}
+$('lgo').onclick=levelRun;
 </script>
 </body>
 </html>
