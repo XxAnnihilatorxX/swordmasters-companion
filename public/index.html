@@ -9,7 +9,7 @@
 :root{--bg:#0d0f17;--card:#151927;--line:#242a40;--gold:#ffc83d;--blue:#38b6ff;--text:#e6e9f5;--mute:#8890ab;--bad:#ff5d73}
 *{box-sizing:border-box}
 body{margin:0;background:radial-gradient(900px 400px at 80% -10%,#16304a55,transparent),var(--bg);color:var(--text);font:15px/1.5 Inter,sans-serif;min-height:100vh}
-main{max-width:1000px;margin:0 auto;padding:28px 18px 60px}
+main{max-width:1680px;margin:0 auto;padding:24px 28px 60px}
 h1,h2,h3{font-family:Orbitron,sans-serif;margin:0}
 h1{font-size:clamp(22px,4vw,34px);font-weight:900;letter-spacing:.04em;color:var(--gold);text-shadow:0 0 18px #ffc83d55}
 h1 span{color:var(--blue);text-shadow:0 0 18px #38b6ff55}
@@ -103,6 +103,7 @@ input[type=number]{flex:1;min-width:0;background:#0a0c13;border:1px solid var(--
 .wi label{display:grid;gap:4px;font-size:11px;color:var(--mute);letter-spacing:.08em}
 .wi input,.wi select{width:100%;padding:10px 12px;background:#0a0c13;border:1px solid var(--line);border-radius:8px;color:var(--text);font:500 14px Inter}
 .bt{font:700 9px Orbitron;font-style:normal;border:1px solid var(--gold);color:var(--gold);border-radius:4px;padding:0 5px;margin-left:6px}
+nav{overflow:visible;flex-wrap:wrap;white-space:normal;gap:4px}nav button{padding:10px 12px;font-size:12.5px}.ind{bottom:auto}
 .hidden{display:none}
 .check{display:flex;gap:8px;align-items:center;padding:5px 0}
 @media(max-width:520px){.search{flex-direction:column}.go{padding:14px}}
@@ -214,7 +215,7 @@ const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v)
 /* ---------- tabs ---------- */
 const TABS=['search','compare','drops','lab','info','tools','staff'],nav=document.querySelector('nav');
 nav.insertAdjacentHTML('beforeend','<span class="ind"></span>');
-function moveInd(){const b=nav.querySelector('[aria-selected=true]'),i=nav.querySelector('.ind');i.style.left=b.offsetLeft+'px';i.style.width=b.offsetWidth+'px';}
+function moveInd(){const b=nav.querySelector('[aria-selected=true]'),i=nav.querySelector('.ind');i.style.left=b.offsetLeft+'px';i.style.width=b.offsetWidth+'px';i.style.top=(b.offsetTop+b.offsetHeight-2)+'px';}
 nav.querySelectorAll('button').forEach(b=>b.onclick=()=>{nav.querySelectorAll('button').forEach(x=>x.setAttribute('aria-selected',x===b));TABS.forEach(t=>$(t).classList.toggle('hidden',t!==b.dataset.tab));moveInd();});
 addEventListener('resize',moveInd);if(document.fonts)document.fonts.ready.then(moveInd);moveInd();
 const SITE={community:''}; /* put your community name here */
@@ -544,9 +545,9 @@ const STAFF=[
  {role:'Owner',label:'Owner',c:'var(--gold)',big:1,people:['Emre']},
  {role:'Developers',label:'Developer',c:'var(--blue)',people:['Emre','Ersin','Hasanklnc','JustMelih','cuvan']},
  {role:'Admins',label:'Admin',c:'var(--bad)',people:['JensJ56','burakersin','PRO9','Nice Face']},
- {role:'Moderators',label:'Moderator',c:'#3dffa0',people:['saltbrgr','harmony','Triple','rin','ōttaM']}
+ {role:'Moderators',label:'Moderator',c:'#3dffa0',people:['saltbrgr','harmony','Triple','rin','ottaM']}
 ];
-const PFP={Emre:'staff/emre.jpg',Ersin:'staff/ersin.jpg',Hasanklnc:'staff/hasanklnc.jpg',JustMelih:'staff/justmelih.jpg',cuvan:'staff/cuvan.jpg',JensJ56:'staff/jensj56.jpg',burakersin:'staff/burakersin.jpg',PRO9:'staff/pro9.jpg','Nice Face':'staff/niceface.jpg',saltbrgr:'staff/saltbrgr.jpg',harmony:'staff/harmony.jpg',Triple:'staff/triple.jpg',rin:'staff/rin.jpg','ōttaM':'staff/ottam.jpg'};
+const PFP={Emre:'staff/emre.jpg',Ersin:'staff/ersin.jpg',Hasanklnc:'staff/hasanklnc.jpg',JustMelih:'staff/justmelih.jpg',cuvan:'staff/cuvan.jpg',JensJ56:'staff/jensj56.jpg',burakersin:'staff/burakersin.jpg',PRO9:'staff/pro9.jpg','Nice Face':'staff/niceface.jpg',saltbrgr:'staff/saltbrgr.jpg',harmony:'staff/harmony.jpg',Triple:'staff/triple.jpg',rin:'staff/rin.jpg','ottaM':'staff/ottam.jpg'};
 $('staff').innerHTML='<h2 class="sh">Meet our Staff Team</h2><p class="ssub">The people who keep the community running.</p>'+STAFF.map(g=>`<h3 style="color:${g.c};margin:26px 0 12px">${g.role.toUpperCase()}</h3><div class="sg">${g.people.map(p=>`<div class="sc${g.big?' big':''}" style="--c:${g.c}"><div class="av">${PFP[p]?`<img src="${esc(PFP[p])}" alt="${esc(p)}">`:esc([...p][0].toUpperCase())}</div><div><b>${esc(p)}</b><small>${g.label.toUpperCase()}</small></div></div>`).join('')}</div>`).join('');
 
 /* ---------- upgrade lab ---------- */
