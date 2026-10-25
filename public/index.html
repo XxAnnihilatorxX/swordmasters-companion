@@ -380,10 +380,12 @@ const ench=a=>Array.isArray(a)&&a.length?a.map(e=>`${ENCHANT_NAMES[e.type]||'Enc
 const sline=(o,keys)=>keys.filter(k=>o[k]).map(k=>LBL[k]+' '+(BIG.includes(k)?abbr(o[k]):'x'+o[k])).join(' · ')||'—';
 const gear=(g,L,K)=>{if(!g||typeof g!=='object')return ['—','—','—','—'];const it=L[g.type];return [`${it?it.n:'Type '+g.type} · Lv ${g.level}`,ench(g.enchantments),g.itemId,it?sline(it,K):'—'];};
 
-const IDMAP={swords:{44:"Soulkeeper's Blade"},shields:{5:'Shield of the Kingdom',42:'Sealguard'},pets:{21:'XPeppy',22:'XAxolotl',23:'XPengoo',24:'XLeo'}};
-const MAP=location.hash==='#mapper',saved=store.get('idmap',{}),snap=store.get('idmap2',null);
+const IDMAP={swords:{0:"Last Horizon",1:"Old Sword",2:"Orc Sword",3:"Double-Edged Sword",4:"Spiked Sword",5:"Dead Man's Sword",6:"Machete Sword",7:"Scimitar Claw",8:"Morbid Will",9:"Inferno Claw",10:"Burned Spikeblade",11:"Icebreaker",12:"Frostbite",13:"Froststeel",14:"Frostfang",15:"Winter's Wrath",16:"Sandstrike",17:"Duneslicer",18:"Sandslasher",19:"Sunfire",20:"Emberwraith",21:"Blade of Sorrow",22:"Flame Heart",23:"Darkblade",24:"Fatecutter",25:"Devil's Blade",26:"Spear of Zeus",27:"Coral Blade",28:"Spiked Moss",29:"Guardian's Spear",30:"Starfire Blade",31:"Nova Blade",32:"Cosmic Blader",33:"Dragon's Teeth",34:"Dragon's Poison",35:"Dragon's Devil",36:"Netherite Blade",37:"Death's Scythe",38:"Einherjar's Blade",39:"Runebreaker",40:"Solbrand",41:"Divinity Edge",42:"Graveborn Edge",43:"Dreadmourne",44:"Soulkeeper's Blade"},
+shields:{0:"Final Bastion",1:"Wooden Shield",2:"Iron Shield",3:"Elite Shield",4:"Warrior's Shield",5:"Shield of the Kingdom",6:"Sweetguard",7:"Warden's Shield",8:"Light Barrier",9:"Obsidian Canny",10:"Dead Guard's Shield",11:"Snowfall Defender",12:"Arctic Ward",13:"Icy Rampart",14:"Frozen Fortress",15:"Winter's Wrathguard",16:"Sunshield",17:"Barbed Sunward",18:"Sunshroud",19:"Sandstone Shield",20:"Emberwraith Shield",21:"Hell Shield",22:"Shield of Fire",23:"Fire Rampart",24:"Infernal Protection",25:"Lord of Hell",26:"Steel Shield",27:"Hardened Moss",28:"Guardian's Protection",29:"Nebula Shield",30:"Starburst Shield",31:"Lunar Shield",32:"Dragon's Shell",33:"Dragon's Anger",34:"Dragon's Soul",35:"Death's Shield",36:"Einherjar's Guard",37:"Runeguard",38:"Sunward Bulwark",39:"Asgardian Aegis",40:"Crackshield",41:"Tombplate",42:"Sealguard"},
+pets:{0:"Piggie",1:"Chicko",2:"Peppy",3:"Gumbear",4:"Croco",5:"Blue Axolotl",6:"Fluffy",7:"Sandy",8:"Pengoo",9:"Scorp",10:"Kamel",11:"Leo",12:"Lava Slime",13:"Firebat",14:"Phoenix",15:"Nemo",16:"Sharkie",17:"Octoo",18:"Fogo",19:"Purr",20:"Xen",21:"XPeppy",22:"XAxolotl",23:"XPengoo",24:"XLeo",25:"XPhoenix",26:"XOctoo",27:"XXen",28:"Mimic",29:"Triwulf",30:"Inferno",31:"Ponyo",32:"Chandy",33:"Runix",34:"XInferno",35:"XRunix"}};
+const MAP=location.hash==='#mapper',saved={},snap=store.get('idmap3',null);
 ['swords','shields','pets'].forEach(k=>{if(snap&&snap[k])IDMAP[k]=snap[k];else Object.assign(IDMAP[k],saved[k]||{});});
-const saveMap=()=>store.set('idmap2',IDMAP);
+const saveMap=()=>store.set('idmap3',IDMAP);
 function assign(k,id,name){Object.keys(IDMAP[k]).forEach(i=>{if(IDMAP[k][i]===name)delete IDMAP[k][i];});if(id!==''&&id!==null)IDMAP[k][id]=name;saveMap();}
 const CATS={swords:SWORDS,shields:SHIELDS,pets:PETS};
 PETS.push(...mk(`XPeppy|L|13|12|.5
@@ -474,12 +476,12 @@ function buildProfile(inv,name,withCombat){
   return `<div class="who"><h2>${esc(name||'Player')}</h2></div>
   <div class="hero">${tile('POWER',abbr(inv.power),full(inv.power),'var(--blue)')}${tile('GOLD',abbr(inv.gold),full(inv.gold),'var(--gold)')}${tile('LEVEL',L.toLocaleString(),'','#3dffa0')}${tile('DAMAGE',c.dmg?abbr(c.dmg):'—',c.dmg?full(c.dmg):'','#ff7a3d')}${tile('MAX HEALTH',abbr(inv.maxHealth),full(inv.maxHealth),'var(--bad)')}</div>
   <div class="mini">${mini.map(([l,v])=>`<div><small>${l}</small><b>${esc(v)}</b></div>`).join('')}</div>
-  <div class="card" style="margin-top:14px"><h3>Inventory</h3>
+  ${armorHtml(inv)}<div class="card" style="margin-top:14px"><h3>Inventory</h3>
    <h4>SWORDS</h4>${cards(stacks(inv.swords,inv.activeSword&&inv.activeSword.itemId,'swords'),'swords')}
    <h4>SHIELDS</h4>${cards(stacks(inv.shields,inv.activeShield&&inv.activeShield.itemId,'shields'),'shields')}
    <h4>PETS</h4>${cards(stacks(inv.pets,(inv.activePets||[]).map(p=>p.itemId),'pets'),'pets')}</div>
   ${bestSetup(inv)}${bossCard(inv)}${withCombat?combat(inv.killedEnemyTypes||{}):''}
-  ${MAP?`<div style="margin-top:14px"><button class="go" id="cm" style="padding:12px 18px">COPY MAPPING JSON</button><details><summary>Raw response</summary><pre>${esc(JSON.stringify(inv,null,2))}</pre></details></div>`:''}`;
+  ${MAP?checkCard(inv):''}${MAP?`<div style="margin-top:14px"><button class="go" id="cm" style="padding:12px 18px">COPY MAPPING JSON</button><details><summary>Raw response</summary><pre>${esc(JSON.stringify(inv,null,2))}</pre></details></div>`:''}`;
 }
 function render(inv,name){LAST=[inv,name];MAPUI=MAP;$('out').innerHTML=buildProfile(inv,name,true);}
 $('out').addEventListener('change',e=>{const t=e.target;if(!t.classList||!t.classList.contains('mp')||!t.value)return;assign(t.dataset.k,t.dataset.t,t.value);if(LAST)render(LAST[0],LAST[1]);});
@@ -510,7 +512,7 @@ if(MAP){
     paintMapper();if(LAST)render(LAST[0],LAST[1]);});
   $('mapper').addEventListener('click',e=>{
     if(e.target.id==='mcopy'){try{navigator.clipboard.writeText(JSON.stringify(IDMAP));e.target.textContent='COPIED';}catch(x){}}
-    if(e.target.id==='mreset'){store.set('idmap2',null);store.set('idmap',{});location.reload();}});
+    if(e.target.id==='mreset'){store.set('idmap3',null);location.reload();}});
   paintMapper();
 }
 async function getPlayer(name){const r=await fetch('/api/lookup?username='+encodeURIComponent(name));const j=await r.json().catch(()=>({}));if(!r.ok||!j.success)throw new Error((j.error||'Lookup failed ('+r.status+').')+' ['+name+']');return j.data;}
@@ -963,6 +965,27 @@ function advHtml(inv,goal,bi,sortBy){
   const pt=a.pairs.length?`<h4>BEST OWNED PAIRS FOR THIS GOAL</h4><div class="tbl" style="max-height:none"><table><tr><th>#</th><th>Sword</th><th>Shield</th><th>${gUnit[goal]}</th></tr>${a.pairs.map((p,i)=>`<tr><td>${i+1}</td><td>${lab(p.s,'s')}</td><td>${lab(p.h,'h')}</td><td>${gFmt(goal,p.v)}</td></tr>`).join('')}</table></div>`:'';
   const note=a.ok?'':'<p class="empty" style="margin-top:12px">Some of this player\'s gear is not recognised yet, so gear-based advice is limited.</p>';
   return `<div class="card gold" style="margin-top:14px"><h3>Upgrade advisor</h3>${tiles}${note}${nd}${pt}<h4>RECOMMENDATIONS</h4><div class="recs">${list||'<p class="empty">Nothing to suggest right now.</p>'}</div></div>`;
+}
+
+/* ---------- armor ids (1 = weakest, 24 = Eternal), checks ---------- */
+const SETORD=["Leather","Iron","Golden","King's","Sweetmallow","Fluffymellow","Softmallow","Soft ","Chocohead","Chocoblock","Chocoshort","Cake","Lollipop","Candyshell","Lollishort","Candy ","Bone","Boneshell","Spiked Shell","Cactus","Obsidian","Immortal","Nether","Hellfire","Seashell","Hydrostone","Sea Guardian","Starfire","Nova","Cosmic","Death","Stormborn","Solarflare","Graveborn","Mourner","Eternal"];
+const setRank=n=>{const i=SETORD.findIndex(p=>n.startsWith(p));return i<0?99:i;};
+const ARSLOT=[['Helmet','activeHelmet'],['Chestplate','activeTorso'],['Pants','activePant'],['Boots','activeShoe']];
+const ARMID={};['Helmet','Chestplate','Pants','Boots'].forEach(sl=>{ARMID[sl]=ARMOR.filter(a=>a.s===sl).sort((a,b)=>a.b-b.b||setRank(a.n)-setRank(b.n));});
+const armorBy=(sl,id)=>ARMID[sl][id-1];
+function armorHtml(inv){
+  const pcs=ARSLOT.map(([sl,k])=>[sl,inv[k],armorBy(sl,inv[k])]);
+  return `<div class="card" style="margin-top:14px"><h3>Armor</h3><div class="cg" style="margin-top:8px">${pcs.map(([sl,id,a])=>a?gcard(SLOTC[sl],a.n,sl.toUpperCase(),'',[gst('POWER',xz(a.pw)),gst('EXTRA HP',nz(a.hp)),gst('HEALTH',xz(a.hm)),gst('GOLD',xz(a.g))],''):gcard(SLOTC[sl],'Armor #'+id,sl.toUpperCase(),'',[],'')).join('')}</div></div>`;
+}
+function checkCard(inv){
+  const aS=inv.activeSword,aH=inv.activeShield,sI=aS&&byId('swords',aS.type),hI=aH&&byId('shields',aH.type),ar=ARSLOT.map(([sl,k])=>armorBy(sl,inv[k])),L=+inv.level||0,rows=[];
+  if(sI&&(!aH||hI)&&ar.every(Boolean)){const HM=sI.hp*sc(aS)+(hI?hI.hp*sc(aH):0)+ar.reduce((t,a)=>t+a.hm,0),EH=ar.reduce((t,a)=>t+a.hp,0),exp=EH+(100+10*Math.pow(L-1,2))*(1+HM),act=+inv.maxHealth,ok=Math.abs(exp-act)<=Math.max(2,act*1e-9);
+    rows.push(['Max health from mapped sword, shield and armor',abbr(exp)+' vs '+abbr(act),ok?'MATCH':'OFF '+((exp/act-1)*100).toFixed(2)+'%']);}
+  else rows.push(['Max health','needs sword, shield and armor recognised','']);
+  const pets=(inv.activePets||[]).map(p=>byId('pets',p.type));
+  if(pets.length&&pets.every(Boolean)&&ar.every(Boolean)){const exp=1+pets.reduce((t,p)=>t+p.pow,0)+ar.reduce((t,a)=>t+a.pw,0),act=+inv.powerMultiplier;rows.push(['Power multiplier from mapped pets and armor',+exp.toFixed(2)+' vs '+act,Math.abs(exp-act)<1e-6?'MATCH':'OFF']);}
+  else rows.push(['Power multiplier','needs pets and armor recognised','']);
+  return `<div class="card" style="margin-top:14px"><h3>Mapping check</h3>${rows.map(([a,b,c])=>`<div class="kv"><span>${a}</span><b>${b}${c?' · '+c:''}</b></div>`).join('')}</div>`;
 }
 let ADVINV=null,ADVNAME='';
 function paintAdvisor(){
