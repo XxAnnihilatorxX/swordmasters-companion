@@ -126,22 +126,17 @@ nav{overflow:visible;flex-wrap:wrap;white-space:normal;gap:4px}nav button{paddin
 .fg2{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:10px 0}
 .fg2 label{font-size:11px;color:var(--mute);display:flex;flex-direction:column;gap:4px}
 .fg2 input,.fg2 select{width:100%;padding:10px 12px}
-.mg{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:8px}
-.mrow{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-left:3px solid var(--c);border-radius:8px;padding:6px 10px;background:var(--card)}
-.mrow span{flex:1;font-size:13px}.mrow em{font-style:normal;font-size:10px;color:var(--c)}.mrow input{width:76px;flex:none;padding:6px 8px}
-.chip{display:inline-flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--bad);border-radius:8px;padding:4px 8px;font-size:12px}
-.chip select{font-size:11px;padding:3px 6px}
 .recs{display:grid;gap:10px;margin-top:12px}
 .rc{display:flex;justify-content:space-between;gap:14px;align-items:center;background:#0f1322;border:1px solid var(--line);border-left:4px solid var(--c);border-radius:10px;padding:12px 14px}
 .rc .tg{font:700 9px Orbitron,sans-serif;color:var(--c);letter-spacing:.14em}.rc .rt{font:700 13px Orbitron,sans-serif;margin-top:2px}
 .rc p{margin:4px 0 0;color:var(--mute);font-size:12.5px}
 .rc .gv{font:800 15px Orbitron,sans-serif;color:var(--c);white-space:nowrap;text-align:right}.rc .gv small{display:block;color:var(--mute);font:500 10px Inter,sans-serif;letter-spacing:.06em}
-#mapper textarea{width:100%;min-height:60px;background:#0a0c13;border:1px solid var(--line);border-radius:8px;color:var(--text);padding:10px;margin:10px 0 6px;font:12px monospace}
-#mapper td input{width:100%;padding:8px 10px;font-size:13px}
 .nd{display:grid;grid-template-columns:150px 1fr 70px;gap:10px;align-items:center;font-size:13px;padding:5px 0}
 .nd i{display:block;height:6px;border-radius:3px;background:linear-gradient(90deg,var(--blue),var(--gold))}.nd b{text-align:right;font-weight:600}
 .sp{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));margin-top:14px}
 .sp small{color:var(--mute);font-size:11px;letter-spacing:.1em}
+.go.alt{background:transparent;color:var(--gold);border:1px solid var(--gold);box-shadow:none}
+.tb{padding:6px 12px;font-size:11px;margin:4px 6px 0 0}
 .hidden{display:none}
 .check{display:flex;gap:8px;align-items:center;padding:5px 0}
 @media(max-width:520px){.search{flex-direction:column}.go{padding:14px}}
@@ -156,6 +151,7 @@ nav{overflow:visible;flex-wrap:wrap;white-space:normal;gap:4px}nav button{paddin
   <button role="tab" aria-selected="false" data-tab="compare">Compare players</button>
   <button role="tab" aria-selected="false" data-tab="adv">Gear Advisor</button>
   <button role="tab" aria-selected="false" data-tab="plan">Planners</button>
+  <button role="tab" aria-selected="false" data-tab="trk">Tracker</button>
   <button role="tab" aria-selected="false" data-tab="drops">Drop finder</button>
   <button role="tab" aria-selected="false" data-tab="lab">Upgrade Lab</button>
   <button role="tab" aria-selected="false" data-tab="info">Game Info</button>
@@ -165,7 +161,7 @@ nav{overflow:visible;flex-wrap:wrap;white-space:normal;gap:4px}nav button{paddin
 <section id="search">
   <div class="search">
     <input id="u" type="text" placeholder="Enter a Sword Masters username" maxlength="32" autocomplete="off" aria-label="Username">
-    <button class="go" id="go">LOOKUP</button>
+    <button class="go" id="go">LOOKUP</button><button class="go alt" id="copyl" style="display:none">COPY LINK</button>
   </div>
   <div id="msg" aria-live="polite"></div>
   <div id="out"></div>
@@ -180,7 +176,7 @@ nav{overflow:visible;flex-wrap:wrap;white-space:normal;gap:4px}nav button{paddin
   <div id="dout" class="grid"></div>
 </section>
 <section id="lab" class="hidden">
-  <div class="layers" id="llayers"><button class="on" data-l="npc">NPC Chances</button><button data-l="merge">Merging</button><button data-l="dmg">Damage</button><button data-l="clan">Clan Info</button></div>
+  <div class="layers" id="llayers"><button class="on" data-l="npc">NPC Chances</button><button data-l="merge">Merging</button><button data-l="dmg">Damage</button><button data-l="ore">Ore Farming</button><button data-l="clan">Clan Info</button></div>
   <div id="L-npc">
    <div class="card gold"><h3>Enchanter &amp; Smelter odds</h3>
     <div class="fg2" style="max-width:520px"><label>Player level<input id="lvl" type="number" min="0" value="10000"></label><label>Fortune level<input id="ft" type="number" min="0" max="20" value="0"></label></div>
@@ -198,6 +194,10 @@ nav{overflow:visible;flex-wrap:wrap;white-space:normal;gap:4px}nav button{paddin
     <label>Sword<select id="ws"></select></label><label>Sword level<input id="wsl" type="number" min="1" value="5"></label><label>Flame level<select id="wf"><option>0</option><option>1</option><option>2</option><option>3</option></select></label>
     <label>Shield<select id="wh"></select></label><label>Shield level<input id="whl" type="number" min="1" value="5"></label></div>
    <div id="wo"></div><button class="go" id="wload" style="padding:10px 16px;margin-top:12px">USE LAST LOOKUP</button></div></div>
+  <div id="L-ore" class="hidden"><div class="card gold"><h3>Ore farming</h3>
+   <div class="search"><input id="ou" type="text" maxlength="32" placeholder="Load a player (optional)" aria-label="Username"><button class="go" id="ogo" style="padding:10px 16px">LOAD</button></div><div id="omsg" aria-live="polite"></div>
+   <div class="fg2"><label>Damage per hit<input id="od" type="text" value="1T"></label><label>Hits per second<input id="oh" type="number" step="0.01" min="0" value="2.79"></label><label>Looting level<select id="olt"><option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select></label><label>Fortune level<input id="ofo" type="number" min="0" max="20" value="0"></label></div>
+   <div id="oo"></div></div></div>
   <div id="L-clan" class="hidden"><div class="grid">
    <div class="card gold"><h3>Clan buildings</h3><div class="fg2"><label>Castle<select id="cc0"><option>0</option><option>1</option><option>2</option></select></label><label>Tent 1<select id="cc1"><option>0</option><option>1</option><option>2</option></select></label><label>Tent 2<select id="cc2"><option>0</option><option>1</option><option>2</option></select></label><label>Tent 3<select id="cc3"><option>0</option><option>1</option><option>2</option></select></label><label>Tent 4<select id="cc4"><option>0</option><option>1</option><option>2</option></select></label></div><div id="co"></div></div>
    <div class="card"><h3>Campfire donation</h3><div class="fg2"><label>Base sell value<input id="cg" type="text" value="1e9"></label><label>Item level<input id="cl" type="number" min="1" value="1"></label></div><div id="cf"></div></div>
@@ -209,7 +209,7 @@ nav{overflow:visible;flex-wrap:wrap;white-space:normal;gap:4px}nav button{paddin
   <div class="cg" id="gt"></div>
 </section>
 <section id="adv" class="hidden">
-  <div class="search"><input id="au" type="text" maxlength="32" placeholder="Enter a username to analyse" aria-label="Username" autocomplete="off"><button class="go" id="ago">ANALYSE</button></div>
+  <div class="search"><input id="au" type="text" maxlength="32" placeholder="Enter a username to analyse" aria-label="Username" autocomplete="off"><button class="go" id="ago">ANALYSE</button><button class="go alt" id="acopy" style="display:none">COPY LINK</button></div>
   <div class="fg2" style="max-width:900px"><label>Goal<select id="ag"><option value="dps">Damage (DPS)</option><option value="power">Power per day</option><option value="gold">Gold multiplier</option><option value="drops">Drops per day</option><option value="health">Health</option></select></label><label>Boss<select id="ab"><option value="0">Mordolith</option><option value="1">The Rival</option><option value="2">Reaper</option><option value="3">Dragon</option></select></label><label>Sort ideas by<select id="as"><option value="gain">Biggest gain</option><option value="hour">Gain per hour</option></select></label></div>
   <div id="amsg" aria-live="polite"></div><div id="aout"></div>
 </section>
@@ -223,6 +223,11 @@ nav{overflow:visible;flex-wrap:wrap;white-space:normal;gap:4px}nav button{paddin
    <div class="fg2"><label>Player<input id="lp" type="text" maxlength="32"></label><label>Boss<select id="lb"><option value="0">Mordolith</option><option value="1">The Rival</option><option value="2">Reaper</option><option value="3">Dragon</option></select></label><label>Hours per day<input id="lh" type="number" min="0.25" max="24" step="0.25" value="8"></label><label>Days<input id="ld" type="number" min="1" max="365" value="7"></label><label>Target level (optional)<input id="lt" type="number" min="1"></label><label>Looting level<select id="ll"><option value="">From gear</option><option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select></label></div>
    <button class="go" id="lgo" style="padding:10px 18px">PLAN</button><div id="lmsg" aria-live="polite"></div></div><div id="lout"></div></div>
 </section>
+<section id="trk" class="hidden">
+  <div class="search"><input id="tu" type="text" maxlength="32" placeholder="Add a player to track" aria-label="Username" autocomplete="off"><button class="go" id="tgo">TRACK</button><button class="go alt" id="tall">REFRESH ALL</button></div>
+  <div id="tmsg" aria-live="polite"></div><div class="cg" id="tlist" style="grid-template-columns:repeat(auto-fill,minmax(330px,1fr))"></div>
+  <p class="note">Tracked players and their history are saved in this browser only.</p>
+</section>
 <section id="staff" class="hidden"></section>
 </main>
 
@@ -232,8 +237,7 @@ const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'
 const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
 
 /* ---------- tabs ---------- */
-addEventListener('hashchange',()=>location.reload());
-const TABS=['search','compare','adv','plan','drops','lab','info','staff'],nav=document.querySelector('nav');
+const TABS=['search','compare','adv','plan','trk','drops','lab','info','staff'],nav=document.querySelector('nav');
 nav.insertAdjacentHTML('beforeend','<span class="ind"></span>');
 function moveInd(){const b=nav.querySelector('[aria-selected=true]'),i=nav.querySelector('.ind');i.style.left=b.offsetLeft+'px';i.style.width=b.offsetWidth+'px';i.style.top=(b.offsetTop+b.offsetHeight-2)+'px';}
 nav.querySelectorAll('button').forEach(b=>b.onclick=()=>{nav.querySelectorAll('button').forEach(x=>x.setAttribute('aria-selected',x===b));TABS.forEach(t=>$(t).classList.toggle('hidden',t!==b.dataset.tab));moveInd();});
@@ -380,13 +384,7 @@ const ench=a=>Array.isArray(a)&&a.length?a.map(e=>`${ENCHANT_NAMES[e.type]||'Enc
 const sline=(o,keys)=>keys.filter(k=>o[k]).map(k=>LBL[k]+' '+(BIG.includes(k)?abbr(o[k]):'x'+o[k])).join(' · ')||'—';
 const gear=(g,L,K)=>{if(!g||typeof g!=='object')return ['—','—','—','—'];const it=L[g.type];return [`${it?it.n:'Type '+g.type} · Lv ${g.level}`,ench(g.enchantments),g.itemId,it?sline(it,K):'—'];};
 
-const IDMAP={swords:{0:"Last Horizon",1:"Old Sword",2:"Orc Sword",3:"Double-Edged Sword",4:"Spiked Sword",5:"Dead Man's Sword",6:"Machete Sword",7:"Scimitar Claw",8:"Morbid Will",9:"Inferno Claw",10:"Burned Spikeblade",11:"Icebreaker",12:"Frostbite",13:"Froststeel",14:"Frostfang",15:"Winter's Wrath",16:"Sandstrike",17:"Duneslicer",18:"Sandslasher",19:"Sunfire",20:"Emberwraith",21:"Blade of Sorrow",22:"Flame Heart",23:"Darkblade",24:"Fatecutter",25:"Devil's Blade",26:"Spear of Zeus",27:"Coral Blade",28:"Spiked Moss",29:"Guardian's Spear",30:"Starfire Blade",31:"Nova Blade",32:"Cosmic Blader",33:"Dragon's Teeth",34:"Dragon's Poison",35:"Dragon's Devil",36:"Netherite Blade",37:"Death's Scythe",38:"Einherjar's Blade",39:"Runebreaker",40:"Solbrand",41:"Divinity Edge",42:"Graveborn Edge",43:"Dreadmourne",44:"Soulkeeper's Blade"},
-shields:{0:"Final Bastion",1:"Wooden Shield",2:"Iron Shield",3:"Elite Shield",4:"Warrior's Shield",5:"Shield of the Kingdom",6:"Sweetguard",7:"Warden's Shield",8:"Light Barrier",9:"Obsidian Canny",10:"Dead Guard's Shield",11:"Snowfall Defender",12:"Arctic Ward",13:"Icy Rampart",14:"Frozen Fortress",15:"Winter's Wrathguard",16:"Sunshield",17:"Barbed Sunward",18:"Sunshroud",19:"Sandstone Shield",20:"Emberwraith Shield",21:"Hell Shield",22:"Shield of Fire",23:"Fire Rampart",24:"Infernal Protection",25:"Lord of Hell",26:"Steel Shield",27:"Hardened Moss",28:"Guardian's Protection",29:"Nebula Shield",30:"Starburst Shield",31:"Lunar Shield",32:"Dragon's Shell",33:"Dragon's Anger",34:"Dragon's Soul",35:"Death's Shield",36:"Einherjar's Guard",37:"Runeguard",38:"Sunward Bulwark",39:"Asgardian Aegis",40:"Crackshield",41:"Tombplate",42:"Sealguard"},
-pets:{0:"Piggie",1:"Chicko",2:"Peppy",3:"Gumbear",4:"Croco",5:"Blue Axolotl",6:"Fluffy",7:"Sandy",8:"Pengoo",9:"Scorp",10:"Kamel",11:"Leo",12:"Lava Slime",13:"Firebat",14:"Phoenix",15:"Nemo",16:"Sharkie",17:"Octoo",18:"Fogo",19:"Purr",20:"Xen",21:"XPeppy",22:"XAxolotl",23:"XPengoo",24:"XLeo",25:"XPhoenix",26:"XOctoo",27:"XXen",28:"Mimic",29:"Triwulf",30:"Inferno",31:"Ponyo",32:"Chandy",33:"Runix",34:"XInferno",35:"XRunix"}};
-const MAP=location.hash==='#mapper',saved={},snap=store.get('idmap3',null);
-['swords','shields','pets'].forEach(k=>{if(snap&&snap[k])IDMAP[k]=snap[k];else Object.assign(IDMAP[k],saved[k]||{});});
-const saveMap=()=>store.set('idmap3',IDMAP);
-function assign(k,id,name){Object.keys(IDMAP[k]).forEach(i=>{if(IDMAP[k][i]===name)delete IDMAP[k][i];});if(id!==''&&id!==null)IDMAP[k][id]=name;saveMap();}
+const IDMAP={"swords": {"1": "Old Sword", "2": "Orc Sword", "3": "Double-Edged Sword", "4": "Spiked Sword", "5": "Dead Man's Sword", "6": "Machete Sword", "7": "Scimitar Claw", "8": "Morbid Will", "9": "Inferno Claw", "10": "Burned Spikeblade", "11": "Icebreaker", "12": "Frostbite", "13": "Froststeel", "14": "Frostfang", "15": "Winter's Wrath", "16": "Sandstrike", "17": "Duneslicer", "18": "Sandslasher", "19": "Sunfire", "20": "Emberwraith", "21": "Blade of Sorrow", "22": "Flame Heart", "23": "Darkblade", "24": "Fatecutter", "25": "Devil's Blade", "26": "Spear of Zeus", "27": "Coral Blade", "28": "Spiked Moss", "29": "Guardian's Spear", "30": "Starfire Blade", "31": "Nova Blade", "32": "Cosmic Blader", "33": "Dragon's Teeth", "34": "Dragon's Poison", "35": "Dragon's Devil", "36": "Netherite Blade", "37": "Death's Scythe", "38": "Einherjar's Blade", "39": "Runebreaker", "40": "Solbrand", "41": "Divinity Edge", "42": "Graveborn Edge", "43": "Dreadmourne", "44": "Soulkeeper's Blade", "45": "Last Horizon"}, "shields": {"1": "Wooden Shield", "2": "Iron Shield", "3": "Elite Shield", "4": "Warrior's Shield", "5": "Shield of the Kingdom", "6": "Sweetguard", "7": "Warden's Shield", "8": "Light Barrier", "9": "Obsidian Canny", "10": "Dead Guard's Shield", "11": "Snowfall Defender", "12": "Arctic Ward", "13": "Icy Rampart", "14": "Frozen Fortress", "15": "Winter's Wrathguard", "16": "Sunshield", "17": "Barbed Sunward", "18": "Sunshroud", "19": "Sandstone Shield", "20": "Emberwraith Shield", "21": "Hell Shield", "22": "Shield of Fire", "23": "Fire Rampart", "24": "Infernal Protection", "25": "Lord of Hell", "26": "Steel Shield", "27": "Hardened Moss", "28": "Guardian's Protection", "29": "Nebula Shield", "30": "Starburst Shield", "31": "Lunar Shield", "32": "Dragon's Shell", "33": "Dragon's Anger", "34": "Dragon's Soul", "35": "Death's Shield", "36": "Einherjar's Guard", "37": "Runeguard", "38": "Sunward Bulwark", "39": "Asgardian Aegis", "40": "Crackshield", "41": "Tombplate", "42": "Sealguard", "43": "Final Bastion"}, "pets": {"0": "Piggie", "1": "Chicko", "2": "Peppy", "3": "Gumbear", "4": "Croco", "5": "Blue Axolotl", "6": "Fluffy", "7": "Sandy", "8": "Pengoo", "9": "Scorp", "10": "Kamel", "11": "Leo", "12": "Lava Slime", "13": "Firebat", "14": "Phoenix", "15": "Nemo", "16": "Sharkie", "17": "Octoo", "18": "Fogo", "19": "Purr", "20": "Xen", "21": "XPeppy", "22": "XAxolotl", "23": "XPengoo", "24": "XLeo", "25": "XPhoenix", "26": "XOctoo", "27": "XXen", "28": "Mimic", "29": "Triwulf", "30": "Inferno", "31": "XInferno", "32": "Ponyo", "33": "Chandy", "34": "Runix", "35": "XRunix"}};
 const CATS={swords:SWORDS,shields:SHIELDS,pets:PETS};
 PETS.push(...mk(`XPeppy|L|13|12|.5
 XAxolotl|L|15|13|.6
@@ -429,7 +427,7 @@ function cards(groups,kind){
   if(!groups.length)return '<p class="empty">None</p>';
   return `<div class="inv">${groups.map(({o,n,eq})=>{const it=byId(kind,o.type),rc=it?RC[it.r]:'#4a5170';
     const st=!it?'':kind==='swords'?'Damage '+abbr(it.dmg*sc(o)):kind==='shields'?(it.dm?'Dmg multi x'+(+(it.dm*sc(o)).toFixed(2)):'Protection '+abbr(it.prot*sc(o))):'Gold x'+it.gold+' · Power x'+it.pow;
-    return `<div class="it${eq?' eq':''}" style="--rc:${rc}"><div class="top"><span>${it?it.r.toUpperCase():'UNKNOWN'}</span>${gear?`<span class="lv">LV ${o.level}</span>`:''}</div><div class="nm">${esc(it?it.n:'Item #'+o.type)}</div><div class="st">${esc(st)}</div>${gear?`<div class="sls">${slots(o,kind)}</div>`:''}${MAPUI&&!it?`<select class="mp" data-k="${kind}" data-t="${o.type}"><option value="">Name this item</option>${CATS[kind].map(x=>`<option>${esc(x.n)}</option>`).join('')}</select>`:''}${eq?'<span class="eqt">EQUIPPED</span>':''}${n>1?`<span class="x">x${n}</span>`:''}</div>`;}).join('')}</div>`;
+    return `<div class="it${eq?' eq':''}" style="--rc:${rc}"><div class="top"><span>${it?it.r.toUpperCase():'UNKNOWN'}</span>${gear?`<span class="lv">LV ${o.level}</span>`:''}</div><div class="nm">${esc(it?it.n:'Item #'+o.type)}</div><div class="st">${esc(st)}</div>${gear?`<div class="sls">${slots(o,kind)}</div>`:''}${eq?'<span class="eqt">EQUIPPED</span>':''}${n>1?`<span class="x">x${n}</span>`:''}</div>`;}).join('')}</div>`;
 }
 const WORLDS=[['Orkland',0,2],['Sugarland',3,5],['Iceworld',6,6],['Desertland',7,9],['Netherworld',10,12],['Heaven',13,13],['Aqualand',14,16],['Spaceland',17,19],['Dragon World',20,21],['Death World',22,22],['Asgard',23,25],['Godyard',26,28]];
 const BOSS=new Set([6,13,21,22,25,28]);
@@ -466,9 +464,7 @@ function bossCard(inv){
   return `<div class="card" style="margin-top:14px"><h3>Boss farming</h3><div class="tbl" style="max-height:none"><table><tr><th>Boss</th><th>Kill time</th><th>Kills / day</th><th>Power / day</th><th>Epic sword and shield drops / day</th></tr>${r}</table></div><p class="note">Solo, farming nonstop, with Looting x${lm}. Epic drop chance is 1% per kill before Looting.</p></div>`;
 }
 let LAST=null;
-let MAPUI=false;
 function buildProfile(inv,name,withCombat){
-  noteSeen(inv);
   const c=calc(inv),L=+inv.level||0,xp=+inv.experience||0;
   const kills=Object.entries(inv.killedEnemyTypes||{}).map(([k,v])=>[k,+v||0]).sort((a,b)=>+a[0]-+b[0]);
   const total=kills.reduce((t,[,v])=>t+v,0),max=Math.max(1,...kills.map(k=>k[1]));
@@ -480,41 +476,9 @@ function buildProfile(inv,name,withCombat){
    <h4>SWORDS</h4>${cards(stacks(inv.swords,inv.activeSword&&inv.activeSword.itemId,'swords'),'swords')}
    <h4>SHIELDS</h4>${cards(stacks(inv.shields,inv.activeShield&&inv.activeShield.itemId,'shields'),'shields')}
    <h4>PETS</h4>${cards(stacks(inv.pets,(inv.activePets||[]).map(p=>p.itemId),'pets'),'pets')}</div>
-  ${bestSetup(inv)}${bossCard(inv)}${withCombat?combat(inv.killedEnemyTypes||{}):''}
-  ${MAP?checkCard(inv):''}${MAP?`<div style="margin-top:14px"><button class="go" id="cm" style="padding:12px 18px">COPY MAPPING JSON</button><details><summary>Raw response</summary><pre>${esc(JSON.stringify(inv,null,2))}</pre></details></div>`:''}`;
+  ${bestSetup(inv)}${bossCard(inv)}${withCombat?combat(inv.killedEnemyTypes||{}):''}`;
 }
-function render(inv,name){LAST=[inv,name];MAPUI=MAP;$('out').innerHTML=buildProfile(inv,name,true);}
-$('out').addEventListener('change',e=>{const t=e.target;if(!t.classList||!t.classList.contains('mp')||!t.value)return;assign(t.dataset.k,t.dataset.t,t.value);if(LAST)render(LAST[0],LAST[1]);});
-$('out').addEventListener('click',e=>{if(e.target.id==='cm'){try{navigator.clipboard.writeText(JSON.stringify(IDMAP));e.target.textContent='COPIED';}catch(x){}}});
-
-const seenAll=store.get('seen',{swords:{},shields:{},pets:{}});
-function noteSeen(inv){if(!MAP)return;['swords','shields','pets'].forEach(k=>{seenAll[k]=seenAll[k]||{};(inv[k]||[]).forEach(o=>{seenAll[k][o.type]=1;});});store.set('seen',seenAll);}
-if(MAP){
-  const b=document.createElement('button');b.setAttribute('role','tab');b.setAttribute('aria-selected','false');b.dataset.tab='mapper';b.textContent='Mapper';
-  nav.insertBefore(b,nav.querySelector('.ind'));
-  const sec=document.createElement('section');sec.id='mapper';sec.className='hidden';document.querySelector('main').appendChild(sec);TABS.push('mapper');
-  b.onclick=()=>{nav.querySelectorAll('button').forEach(x=>x.setAttribute('aria-selected',x===b));TABS.forEach(t=>$(t).classList.toggle('hidden',t!==b.dataset.tab));moveInd();};
-}
-function paintMapper(){
-  const K=[['swords','Swords',SWORDS],['shields','Shields',SHIELDS],['pets','Pets',PETS]];
-  const idOf=(k,n)=>{const e=Object.entries(IDMAP[k]).find(([,v])=>v===n);return e?e[0]:'';};
-  $('mapper').innerHTML=`<div class="card gold"><h3>ID mapper</h3><p class="note">Type each item's game ID next to its name. Look up players first: unnamed IDs that appear in lookups are listed under each category so you can name them.</p>
-   <div class="search"><button class="go" id="mcopy" style="padding:12px 18px">COPY MAPPING JSON</button><button class="go" id="mreset" style="padding:12px 18px;background:var(--bad)">RESET</button></div></div>`+
-  K.map(([k,t,L])=>{const unk=Object.keys(seenAll[k]||{}).map(Number).sort((a,b)=>a-b).filter(i=>!IDMAP[k][i]);
-    return `<div class="card" style="margin-top:14px"><h3>${t} · ${L.filter(x=>idOf(k,x.n)!=='').length} / ${L.length} named</h3>
-    ${unk.length?`<h4>UNNAMED IDS SEEN</h4><div class="inv" style="margin-bottom:10px">${unk.map(i=>`<span class="chip">#${i} <select data-k="${k}" data-id="${i}"><option value="">Pick name</option>${L.map(x=>`<option>${esc(x.n)}</option>`).join('')}</select></span>`).join('')}</div>`:''}
-    <div class="mg">${L.map((x,i)=>`<label class="mrow" style="--c:${RC[x.r]}"><span>${esc(x.n)}</span><em>${x.r}</em><input type="number" min="0" data-k="${k}" data-n="${esc(x.n)}" value="${idOf(k,x.n)}" placeholder="ID"></label>`).join('')}</div></div>`;}).join('');
-}
-if(MAP){
-  $('mapper').addEventListener('change',e=>{const t=e.target;
-    if(t.dataset.n!==undefined)assign(t.dataset.k,t.value.trim(),t.dataset.n);
-    else if(t.dataset.id!==undefined&&t.value)assign(t.dataset.k,t.dataset.id,t.value);else return;
-    paintMapper();if(LAST)render(LAST[0],LAST[1]);});
-  $('mapper').addEventListener('click',e=>{
-    if(e.target.id==='mcopy'){try{navigator.clipboard.writeText(JSON.stringify(IDMAP));e.target.textContent='COPIED';}catch(x){}}
-    if(e.target.id==='mreset'){store.set('idmap3',null);location.reload();}});
-  paintMapper();
-}
+function render(inv,name){LAST=[inv,name];$('out').innerHTML=buildProfile(inv,name,true);}
 async function getPlayer(name){const r=await fetch('/api/lookup?username='+encodeURIComponent(name));const j=await r.json().catch(()=>({}));if(!r.ok||!j.success)throw new Error((j.error||'Lookup failed ('+r.status+').')+' ['+name+']');return j.data;}
 
 async function lookup(){
@@ -526,7 +490,7 @@ async function lookup(){
     const r=await fetch('/api/lookup?username='+encodeURIComponent(name));
     const j=await r.json().catch(()=>({}));
     if(!r.ok||!j.success)throw new Error(j.error||'Lookup failed ('+r.status+').');
-    $('msg').innerHTML='';render(j.data,name);
+    $('msg').innerHTML='';render(j.data,name);setShare('u',name,'copyl');
   }catch(e){$('msg').innerHTML=`<div class="banner">${esc(e.message)}</div>`;}
   finally{$('go').disabled=false;}
 }
@@ -818,7 +782,7 @@ function paintInfo(){
 $('gpills').innerHTML=GCATS.map(([k,t])=>`<button data-k="${k}">${t}</button>`).join('');
 document.querySelectorAll('#gpills button').forEach(b=>b.onclick=()=>{GK=b.dataset.k;$('gq').value='';fillFilter();paintInfo();});
 $('gf').onchange=paintInfo;$('gq').oninput=paintInfo;fillFilter();paintInfo();
-document.querySelectorAll('#llayers button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#llayers button').forEach(x=>x.classList.toggle('on',x===b));['npc','merge','dmg','clan'].forEach(l=>$('L-'+l).classList.toggle('hidden',l!==b.dataset.l));});
+document.querySelectorAll('#llayers button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#llayers button').forEach(x=>x.classList.toggle('on',x===b));['npc','merge','dmg','ore','clan'].forEach(l=>$('L-'+l).classList.toggle('hidden',l!==b.dataset.l));});
 ['lvl','ft','pp','mg','dl','dr','dft'].forEach(i=>{$(i).oninput=paintLab;$(i).onchange=paintLab;});paintLab();
 
 /* ---------- damage calculator ---------- */
@@ -964,7 +928,7 @@ function advHtml(inv,goal,bi,sortBy){
   const lab=(x,k)=>x.it?`${esc(x.it.n)} Lv ${x.o.level}${k==='s'&&adEn(x.o,0)?' · Flame '+ROM[adEn(x.o,0)]:''}`:'None';
   const pt=a.pairs.length?`<h4>BEST OWNED PAIRS FOR THIS GOAL</h4><div class="tbl" style="max-height:none"><table><tr><th>#</th><th>Sword</th><th>Shield</th><th>${gUnit[goal]}</th></tr>${a.pairs.map((p,i)=>`<tr><td>${i+1}</td><td>${lab(p.s,'s')}</td><td>${lab(p.h,'h')}</td><td>${gFmt(goal,p.v)}</td></tr>`).join('')}</table></div>`:'';
   const note=a.ok?'':'<p class="empty" style="margin-top:12px">Some of this player\'s gear is not recognised yet, so gear-based advice is limited.</p>';
-  return `<div class="card gold" style="margin-top:14px"><h3>Upgrade advisor</h3>${tiles}${note}${nd}${pt}<h4>RECOMMENDATIONS</h4><div class="recs">${list||'<p class="empty">Nothing to suggest right now.</p>'}</div></div>`;
+  return `<div class="card gold" style="margin-top:14px"><h3>Upgrade advisor</h3>${tiles}${note}${nd}${pt}${petTeams(inv)}<h4>RECOMMENDATIONS</h4><div class="recs">${list||'<p class="empty">Nothing to suggest right now.</p>'}</div></div>`;
 }
 
 /* ---------- armor ids (1 = weakest, 24 = Eternal), checks ---------- */
@@ -977,26 +941,16 @@ function armorHtml(inv){
   const pcs=ARSLOT.map(([sl,k])=>[sl,inv[k],armorBy(sl,inv[k])]);
   return `<div class="card" style="margin-top:14px"><h3>Armor</h3><div class="cg" style="margin-top:8px">${pcs.map(([sl,id,a])=>a?gcard(SLOTC[sl],a.n,sl.toUpperCase(),'',[gst('POWER',xz(a.pw)),gst('EXTRA HP',nz(a.hp)),gst('HEALTH',xz(a.hm)),gst('GOLD',xz(a.g))],''):gcard(SLOTC[sl],'Armor #'+id,sl.toUpperCase(),'',[],'')).join('')}</div></div>`;
 }
-function checkCard(inv){
-  const aS=inv.activeSword,aH=inv.activeShield,sI=aS&&byId('swords',aS.type),hI=aH&&byId('shields',aH.type),ar=ARSLOT.map(([sl,k])=>armorBy(sl,inv[k])),L=+inv.level||0,rows=[];
-  if(sI&&(!aH||hI)&&ar.every(Boolean)){const HM=sI.hp*sc(aS)+(hI?hI.hp*sc(aH):0)+ar.reduce((t,a)=>t+a.hm,0),EH=ar.reduce((t,a)=>t+a.hp,0),exp=EH+(100+10*Math.pow(L-1,2))*(1+HM),act=+inv.maxHealth,ok=Math.abs(exp-act)<=Math.max(2,act*1e-9);
-    rows.push(['Max health from mapped sword, shield and armor',abbr(exp)+' vs '+abbr(act),ok?'MATCH':'OFF '+((exp/act-1)*100).toFixed(2)+'%']);}
-  else rows.push(['Max health','needs sword, shield and armor recognised','']);
-  const pets=(inv.activePets||[]).map(p=>byId('pets',p.type));
-  if(pets.length&&pets.every(Boolean)&&ar.every(Boolean)){const exp=1+pets.reduce((t,p)=>t+p.pow,0)+ar.reduce((t,a)=>t+a.pw,0),act=+inv.powerMultiplier;rows.push(['Power multiplier from mapped pets and armor',+exp.toFixed(2)+' vs '+act,Math.abs(exp-act)<1e-6?'MATCH':'OFF']);}
-  else rows.push(['Power multiplier','needs pets and armor recognised','']);
-  return `<div class="card" style="margin-top:14px"><h3>Mapping check</h3>${rows.map(([a,b,c])=>`<div class="kv"><span>${a}</span><b>${b}${c?' · '+c:''}</b></div>`).join('')}</div>`;
-}
 let ADVINV=null,ADVNAME='';
 function paintAdvisor(){
-  if(!ADVINV)return;MAPUI=false;const mk='<div class="card" style="margin-top:14px"><h3>Inventory</h3>',h=buildProfile(ADVINV,ADVNAME,false);
+  if(!ADVINV)return;const mk='<div class="card" style="margin-top:14px"><h3>Inventory</h3>',h=buildProfile(ADVINV,ADVNAME,false);
   $('aout').innerHTML=h.replace(mk,advHtml(ADVINV,$('ag').value,+$('ab').value,$('as').value)+mk);
 }
 async function runAdvisor(){
   const n=$('au').value.trim();$('aout').innerHTML='';
   if(!n){$('amsg').innerHTML='<div class="banner">Enter a username first.</div>';return;}
   $('ago').disabled=true;$('amsg').innerHTML='<div class="loading"><div class="spin"></div>Analysing…</div>';
-  try{ADVINV=await getPlayer(n);ADVNAME=n;$('amsg').innerHTML='';paintAdvisor();}
+  try{ADVINV=await getPlayer(n);ADVNAME=n;$('amsg').innerHTML='';paintAdvisor();setShare('adv',n,'acopy');}
   catch(e){$('amsg').innerHTML=`<div class="banner">${esc(e.message)}</div>`;}finally{$('ago').disabled=false;}
 }
 $('ago').onclick=runAdvisor;$('au').addEventListener('keydown',e=>{if(e.key==='Enter')runAdvisor();});
@@ -1043,6 +997,76 @@ async function levelRun(){
   }catch(e){$('lmsg').innerHTML=`<div class="banner">${esc(e.message)}</div>`;}finally{$('lgo').disabled=false;}
 }
 $('lgo').onclick=levelRun;
+
+/* ---------- share links ---------- */
+function shareUrl(p,v){const u=new URL(location.href);u.search='';u.hash='';u.searchParams.set(p,v);return u.toString();}
+function setShare(p,v,btn){try{history.replaceState(null,'',shareUrl(p,v));}catch(e){}
+  const b=$(btn);b.style.display='';b.onclick=()=>{try{navigator.clipboard.writeText(shareUrl(p,v));b.textContent='LINK COPIED';setTimeout(()=>b.textContent='COPY LINK',1500);}catch(e){}};}
+
+/* ---------- pet teams ---------- */
+function petTeams(inv){
+  const pets=(inv.pets||[]).map(o=>byId('pets',o.type)).filter(Boolean),act=(inv.activePets||[]).map(p=>byId('pets',p.type));
+  if(pets.length<3||!act.length||!act.every(Boolean))return '';
+  const pm=+inv.powerMultiplier||1,gm=+inv.goldMultiplier||1,sum=(t,k)=>t.reduce((x,p)=>x+p[k],0),cp=sum(act,'pow'),cg=sum(act,'gold');
+  const top=f=>[...pets].sort((a,b)=>f(b)-f(a)).slice(0,3);
+  const teams=[['Current',act],['Best for power',top(p=>p.pow*1e3+p.gold)],['Best for gold',top(p=>p.gold*1e3+p.pow)],['Best combined',top(p=>p.pow+p.gold)]];
+  const sg=v=>(v>=0.05?'+':'')+(Math.abs(v)<0.05?'0':v.toFixed(1))+'%';
+  return `<h4>PET TEAMS</h4><div class="tbl" style="max-height:none"><table><tr><th>Team</th><th>Pets</th><th>Power x</th><th>Gold x</th><th>Power multiplier</th><th>Gold multiplier</th></tr>${teams.map(([n,t],i)=>`<tr><td>${n}</td><td>${t.map(p=>esc(p.n)).join(', ')}</td><td>${+sum(t,'pow').toFixed(2)}</td><td>${+sum(t,'gold').toFixed(2)}</td><td>${i?sg(advPc(pm-cp+sum(t,'pow'),pm)):'—'}</td><td>${i?sg(advPc(gm-cg+sum(t,'gold'),gm)):'—'}</td></tr>`).join('')}</table></div>`;
+}
+
+/* ---------- ore farming ---------- */
+const pnum=v=>{const m=String(v).trim().toUpperCase().match(/^([\d.]+(?:E[+-]?\d+)?)\s*(K|M|B|T|QT|QNT|SXT)?$/);return m?parseFloat(m[1])*({K:1e3,M:1e6,B:1e9,T:1e12,QT:1e15,QNT:1e18,SXT:1e21}[m[2]]||1):(Number(v)||0);};
+const OREL=[1,1.2,1.4,1.6,1.8,2,2];
+function paintOre(){
+  const D=pnum($('od').value)/10*(+$('oh').value||0),L=Math.min(6,+$('olt').value||0),F=Math.max(0,Math.min(20,+$('ofo').value||0));
+  const avg=ORES.reduce((t,o)=>t+parseFloat(o[4])/100*o[3],0),bps=D>0?D/avg:0;let tt=0;
+  const rows=ORES.map(o=>{const ph=parseFloat(o[4])/100,ores=3600*bps*ph*OREL[L],tries=ores/10,ch=Math.min(100,o[6]*(1+.05*F));tt+=tries;
+    return `<tr><td style="color:${ORC[o[0]]}">${o[0]}</td><td>${o[1]}</td><td>${o[4]}</td><td>${dnum(ores)}</td><td>${dnum(tries)}</td><td>${+ch.toFixed(1)}%</td><td>${dnum(tries*ch/100)}</td><td>${ores>0?plT(36e3/ores):'—'}</td></tr>`;});
+  $('oo').innerHTML=minis([['BLOCKS PER HOUR',dnum(3600*bps)],['ORES PER HOUR',dnum(3600*bps*OREL[L])],['SMELT TRIES PER HOUR',dnum(tt)]])+`<div class="tbl" style="max-height:none"><table><tr><th>Ore</th><th>Enchant</th><th>Spawn chance</th><th>Ores per hour</th><th>Smelt tries per hour</th><th>Smelt success</th><th>Smelted ores per hour</th><th>Time for 10 ores</th></tr>${rows.join('')}</table></div><p class="note">Estimate: about one ore per block destroyed, with no travel or respawn time. Hits on ore blocks deal damage ÷ 10.</p>`;
+}
+async function loadOre(){
+  const n=$('ou').value.trim();if(!n){$('omsg').innerHTML='<div class="banner">Enter a username first.</div>';return;}
+  $('ogo').disabled=true;$('omsg').innerHTML='<div class="loading"><div class="spin"></div>Loading…</div>';
+  try{const inv=await getPlayer(n),a=plAcct(inv,+inv.power||0,+inv.level||0);
+    if(!a){$('omsg').innerHTML='<div class="banner">This player\'s gear is not recognised yet, so enter the damage by hand.</div>';return;}
+    $('od').value=a.dmg.toExponential(4);$('oh').value=a.hits.toFixed(2);$('olt').value=a.loot;$('ofo').value=adEn(inv.activeShield,4);$('omsg').innerHTML='';paintOre();
+  }catch(e){$('omsg').innerHTML=`<div class="banner">${esc(e.message)}</div>`;}finally{$('ogo').disabled=false;}
+}
+$('ogo').onclick=loadOre;['od','oh','olt','ofo'].forEach(i=>{$(i).oninput=paintOre;$(i).onchange=paintOre;});paintOre();
+
+/* ---------- progress tracker ---------- */
+const tget=()=>store.get('trk',{}),tset=d=>store.set('trk',d);
+async function trackOne(name){
+  const inv=await getPlayer(name),d=tget(),key=Object.keys(d).find(k=>k.toLowerCase()===name.toLowerCase())||name,arr=d[key]||[];
+  const sn={t:Date.now(),L:+inv.level||0,P:+inv.power||0,G:+inv.gold||0},last=arr[arr.length-1];
+  if(last&&sn.t-last.t<300000)arr[arr.length-1]=sn;else arr.push(sn);
+  d[key]=arr.slice(-120);tset(d);return key;
+}
+function paintTrack(){
+  const d=tget(),names=Object.keys(d);
+  $('tlist').innerHTML=names.length?names.map(n=>{const a=d[n],f=a[0],l=a[a.length-1],days=(l.t-f.t)/864e5,more=a.length>1;
+    return `<div class="gc" style="--g:#38b6ff"><div class="gh"><span class="gn">${esc(n)}</span><span class="gr">${a.length} SNAPSHOT${a.length>1?'S':''}</span></div>
+     <div class="gs">${gst('LEVEL',l.L.toLocaleString())}${gst('POWER',abbr(l.P))}${gst('GOLD',abbr(l.G))}${gst('LAST UPDATED',new Date(l.t).toLocaleDateString())}</div>
+     <div class="gd">${more?`<b class="dh">SINCE ${esc(new Date(f.t).toLocaleDateString())} · ${days<1?'UNDER A DAY':days.toFixed(1)+' DAYS'}</b>${dl('Levels','+'+(l.L-f.L).toLocaleString())}${dl('Power',(l.P>=f.P?'+':'')+advPc(l.P,f.P).toFixed(2)+'%')}${dl('Gold','+'+abbr(Math.max(0,l.G-f.G)))}<small style="color:var(--mute)">LEVEL</small>${spark(a.map(x=>x.L),'#3dffa0')}<small style="color:var(--mute)">POWER</small>${spark(a.map(x=>x.P),'#38b6ff')}`:'<span class="empty">Refresh later to see growth.</span>'}
+      <div><button class="go alt tb" data-a="r" data-n="${esc(n)}">REFRESH</button><button class="go alt tb" data-a="o" data-n="${esc(n)}">OPEN</button><button class="go alt tb" data-a="x" data-n="${esc(n)}">REMOVE</button></div></div></div>`;}).join(''):'<p class="empty">No tracked players yet. Add a username above.</p>';
+}
+async function trackAdd(name){
+  $('tmsg').innerHTML='<div class="loading"><div class="spin"></div>Updating…</div>';
+  try{await trackOne(name);$('tmsg').innerHTML='';paintTrack();}catch(e){$('tmsg').innerHTML=`<div class="banner">${esc(e.message)}</div>`;}
+}
+$('tgo').onclick=()=>{const n=$('tu').value.trim();if(!n){$('tmsg').innerHTML='<div class="banner">Enter a username first.</div>';return;}$('tu').value='';trackAdd(n);};
+$('tu').addEventListener('keydown',e=>{if(e.key==='Enter')$('tgo').click();});
+$('tall').onclick=async()=>{const ns=Object.keys(tget()).slice(0,8);for(const n of ns){await trackAdd(n);await new Promise(r=>setTimeout(r,600));}};
+$('tlist').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const n=b.dataset.n,a=b.dataset.a;
+  if(a==='r')trackAdd(n);else if(a==='x'){const d=tget();delete d[n];tset(d);paintTrack();}
+  else if(a==='o'){document.querySelector('nav button[data-tab="search"]').click();$('u').value=n;lookup();}});
+paintTrack();
+
+/* ---------- open a shared link ---------- */
+(function(){const q=new URLSearchParams(location.search),go=t=>{const b=document.querySelector('nav button[data-tab="'+t+'"]');b&&b.click();};
+  if(q.get('u')){$('u').value=q.get('u');lookup();}
+  else if(q.get('adv')){go('adv');$('au').value=q.get('adv');runAdvisor();}
+  else if(q.get('cmp')){const p=q.get('cmp').split(',');go('compare');$('c1').value=p[0]||'';$('c2').value=p[1]||'';compare();}})();
 </script>
 </body>
 </html>
