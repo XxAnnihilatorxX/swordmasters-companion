@@ -137,6 +137,9 @@ nav{overflow:visible;flex-wrap:wrap;white-space:normal;gap:4px}nav button{paddin
 .sp small{color:var(--mute);font-size:11px;letter-spacing:.1em}
 .go.alt{background:transparent;color:var(--gold);border:1px solid var(--gold);box-shadow:none}
 .tb{padding:6px 12px;font-size:11px;margin:4px 6px 0 0}
+.lvs{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.lvs span{font:600 11px Orbitron,sans-serif;border:1px solid var(--line);border-radius:6px;padding:2px 8px;color:var(--mute)}
+.lvs .up{color:var(--c);border-color:var(--c)}
 .hidden{display:none}
 .check{display:flex;gap:8px;align-items:center;padding:5px 0}
 @media(max-width:520px){.search{flex-direction:column}.go{padding:14px}}
@@ -822,7 +825,7 @@ function paintClan(){
 
 /* ---------- gear advisor ---------- */
 const ADXP={Peppy:['XPeppy',1],'Blue Axolotl':['XAxolotl',2],Pengoo:['XPengoo',3],Leo:['XLeo',4],Phoenix:['XPhoenix',5],Octoo:['XOctoo',6],Xen:['XXen',7],Runix:['XRunix',19]};
-const ADLOOT=[1,1.6,2.2,2.8,3.4,4,4],ADTAG={SWAP:'#ffc83d',MERGE:'#38b6ff',ENCHANT:'#ff7a3d',PETS:'#3dffa0',ENHANCE:'#b36bff',TARGET:'#ff5db1'};
+const ADLOOT=[1,1.6,2.2,2.8,3.4,4,4],ADTAG={SWAP:'#ffc83d',MERGE:'#38b6ff',ENCHANT:'#ff7a3d',PETS:'#3dffa0',ENHANCE:'#b36bff',TARGET:'#ff5db1',LEVEL:'#38d6ff'};
 const advPc=(a,b)=>b>0?(a/b-1)*100:0;
 const advOdds=(n,L,F)=>{const e=EN.find(x=>x[0]===n),t=Math.max(0,Math.min(1,(L-2000)/18000));let c=e[2].map((v,i)=>v+(e[3][i]-v)*t);const mv=c[0]*.05*F,sm=c[1]+c[2]+c[3];return [c[0]-mv,...[1,2,3].map(i=>c[i]+mv*c[i]/sm)];};
 const adEn=(o,t)=>{const e=o&&(o.enchantments||[]).find(x=>x.type===t);return e?e.level:0;};
@@ -870,7 +873,7 @@ function advAnalyze(inv,goal,bi,sortBy){
   const B=PLB[bi],P=+inv.power||0,L=+inv.level||0,pm=+inv.powerMultiplier||1,cx={P,L,pm},aS=inv.activeSword,aH=inv.activeShield;
   const sI=aS&&byId('swords',aS.type),hI=aH&&byId('shields',aH.type),ok=!!sI&&(!aH||!!hI),hl=aH?aH.level:1,F=adEn(aH,4);
   const E=(S,Sl,Sf,Sk,H,Hl,Hk,c=cx)=>advEval(goal,B,c,S,Sl,Sf,Sk,H,Hl,Hk);
-  const cur=ok?E(sI,aS.level,adEn(aS,0),adEn(aS,2),hI,hl,adEn(aH,2)):null,rec=[],res={ok,cur,goal,B,rec,pairs:[],needle:[]};
+  const cur=ok?E(sI,aS.level,adEn(aS,0),adEn(aS,2),hI,hl,adEn(aH,2)):null,rec=[],res={ok,cur,goal,B,rec,pairs:[],needle:[],done:[]};
   const uq=(l,k)=>{const m=new Map();(l||[]).forEach(o=>{const it=byId(k,o.type),key=o.type+'|'+o.level+'|'+JSON.stringify(o.enchantments||[]);if(it&&!m.has(key))m.set(key,{o,it});});return [...m.values()];};
   const OS=uq(inv.swords,'swords'),OH=uq(inv.shields,'shields'),HH=OH.length?OH:[{o:null,it:null}],prs=[];
   OS.forEach(s=>HH.forEach(h=>prs.push({s,h,v:E(s.it,s.o.level,adEn(s.o,0),adEn(s.o,2),h.it,h.o?h.o.level:1,adEn(h.o,2))})));
@@ -884,21 +887,34 @@ function advAnalyze(inv,goal,bi,sortBy){
       rec.push({tag:'MERGE',ready:g.n>=need?1:0,title:`${g.it.n}: Lv ${g.o.level} to Lv ${g.o.level+1}`,text:g.n>=need?`You have ${g.n} of the ${need} needed. Merge them now.`:`You have ${g.n} of the ${need} needed.`,gain,unit:gu});};
     grp(inv.swords,'swords').forEach(g=>merge(g,'swords'));grp(inv.shields,'shields').forEach(g=>merge(g,'shields'));
     const f=adEn(aS,0),lt=Math.min(6,adEn(aS,2)+adEn(aH,2));
-    if(f<3&&(goal==='dps'||goal==='power')){const v=E(sI,aS.level,3,adEn(aS,2),hI,hl,adEn(aH,2)),o=advOdds('Flame',L,F);rec.push({tag:'ENCHANT',title:f?'Raise Flame to Level III':'Add Flame to your sword',text:`Level III chance per try is ${+o[3].toFixed(2)}% at your level.`,gain:advPc(v,cur),unit:gu});}
-    if(lt<6){const v=E(sI,aS.level,f,adEn(aS,2)+1>6?6:adEn(aS,2)+1,hI,hl,adEn(aH,2)),g2=goal==='drops'?advPc(v,cur):ADLOOT[lt+1]/ADLOOT[lt]*100-100;rec.push({tag:'ENCHANT',title:'Add or raise Looting',text:`Drop rates go from x${ADLOOT[lt]} to x${ADLOOT[lt+1]} for each extra total level.`,gain:g2,unit:'DROPS'});}
+    if(f>=3)res.done.push(['Flame Level III','Perfect. Flame is already at its highest level.']);
+    else if(goal==='dps'||goal==='power'){const v=E(sI,aS.level,3,adEn(aS,2),hI,hl,adEn(aH,2)),o=advOdds('Flame',L,F);rec.push({tag:'ENCHANT',title:f?'Raise Flame to Level III':'Add Flame to your sword',text:`Level III chance per try is ${+o[3].toFixed(2)}% at your level.`,gain:advPc(v,cur),unit:gu});}
+    if(lt>=5)res.done.push([`Looting ${lt}/6`,'Perfect. Drops are already at the x4 maximum.']);
+    else{const v=E(sI,aS.level,f,adEn(aS,2)+1,hI,hl,adEn(aH,2)),g2=goal==='drops'?advPc(v,cur):ADLOOT[lt+1]/ADLOOT[lt]*100-100;rec.push({tag:'ENCHANT',title:'Add or raise Looting',text:`Drop rates go from x${ADLOOT[lt]} to x${ADLOOT[lt+1]} for each extra total level.`,gain:g2,unit:'DROPS'});}
     if(!adEn(aS,3))rec.push({tag:'ENCHANT',title:'Add Freeze to your sword',text:'Slows enemies by 75% for as many seconds as the level. It adds no damage.',gain:null});
     if(aH&&!adEn(aH,1))rec.push({tag:'ENCHANT',title:'Add Thorns to your shield',text:'Reflects 1% of a mob\'s health per level back as power.',gain:null});
     if(aH&&!adEn(aH,4))rec.push({tag:'ENCHANT',title:'Add Fortune to your shield',text:'Adds 5% per level to NPC success chances.',gain:null});
-    // goals you can still reach
-    const ownS=new Set(),ownH=new Set();(inv.swords||[]).forEach(o=>{const i=byId('swords',o.type);i&&ownS.add(i.n);});(inv.shields||[]).forEach(o=>{const i=byId('shields',o.type);i&&ownH.add(i.n);});
-    const farm=(name)=>{const src=dropsOf(name)[0];if(!src||!ac||!src[2])return null;const e=ENEMIES[src[1]],t=plKill(e.hp,ac.N,ac.Fl),cyc=t+ERESP[src[1]]+1.15,kills=100/(parseFloat(src[2])*ADLOOT[ac.loot]);return {kills,hours:kills*cyc/3600,src};};
-    const tg=(L2,k)=>{const own=k==='swords'?ownS:ownH;const c=L2.filter(x=>!own.has(x.n)).map(x=>{
-        const pot=k==='swords'?E(x,aS.level,adEn(aS,0),adEn(aS,2),hI,hl,adEn(aH,2)):E(sI,aS.level,adEn(aS,0),adEn(aS,2),x,aH?aH.level:1,adEn(aH,2));
-        const now=k==='swords'?E(x,1,0,0,hI,hl,adEn(aH,2)):E(sI,aS.level,adEn(aS,0),adEn(aS,2),x,1,0);return {x,pot,now,g:advPc(pot,cur)};}).filter(z=>z.g>1).sort((a,b)=>a.g-b.g);
-      if(!c.length)return;const pick=[c[0]];if(c[c.length-1]!==c[0])pick.push(c[c.length-1]);
-      pick.forEach((z,i)=>{const fm=farm(z.x.n),src=dropsOf(z.x.n)[0],sr=src?`Drops from ${src[0]} (${src[2]||'?'}%).`:ELFI.includes(z.x.n)?'Bought from the Elf.':'';
-        rec.push({tag:'TARGET',title:`${i?'Best goal':'Next step'}: ${z.x.n}`,text:`${sr} At Lv 1 it is ${advPc(z.now,cur)>=0?'+':''}${advPc(z.now,cur).toFixed(1)}% vs what you wear now; levelled to Lv ${k==='swords'?aS.level:aH?aH.level:1} with your enchants it is +${z.g.toFixed(1)}%.${fm?` Expect ~${dnum(fm.kills)} kills (${plT(fm.hours*3600)}).`:''}`,gain:z.g,unit:gu,hours:fm?fm.hours:null});});};
-    tg(SWORDS,'swords');tg(SHIELDS,'shields');
+    // gear goals: a ladder of the best epic of each world, ending at the four top items. Only rungs the player can realistically farm are suggested.
+    const READY_S=420,READY_H=150;
+    const LAD={swords:["Dead Man's Sword","Burned Spikeblade","Winter's Wrath","Emberwraith","Devil's Blade","Spear of Zeus","Guardian's Spear","Cosmic Blader","Dragon's Poison","Death's Scythe","Solbrand","Soulkeeper's Blade","Last Horizon"],
+      shields:["Shield of the Kingdom","Dead Guard's Shield","Winter's Wrathguard","Emberwraith Shield","Lord of Hell","Guardian's Protection","Lunar Shield","Dragon's Anger","Death's Shield","Sunward Bulwark","Sealguard","Final Bastion"]};
+    const ELFP={'Last Horizon':"Soulkeeper's Blade",'Final Bastion':'Sealguard'};
+    const own=k=>{const m=new Map();(inv[k]||[]).forEach(o=>{const it=byId(k,o.type);if(!it)return;const g=m.get(it.n)||{lv:0,n:0};g.lv=Math.max(g.lv,o.level);g.n++;m.set(it.n,g);});return m;};
+    const farm=(name)=>{const src=dropsOf(name)[0];if(!src||!ac||!src[2])return null;const e=ENEMIES[src[1]],t=plKill(e.hp,ac.N,ac.Fl),cyc=t+ERESP[src[1]]+1.15,kills=100/(parseFloat(src[2])*ADLOOT[ac.loot]);return {kills,hours:kills*cyc/3600,t,src};};
+    const ladder=k=>{
+      const Ls=LAD[k],M=own(k),eq=k==='swords'?sI:hI,eqLv=k==='swords'?aS.level:(aH?aH.level:1);let have=-1;Ls.forEach((n,i)=>{if(M.has(n))have=i;});
+      const val=(it,lv)=>k==='swords'?E(it,lv,adEn(aS,0),adEn(aS,2),hI,hl,adEn(aH,2)):E(sI,aS.level,adEn(aS,0),adEn(aS,2),it,lv,adEn(aH,2));
+      const ready=n=>{if(ELFP[n])return M.has(ELFP[n]);const fm=farm(n);return !!fm&&fm.t<=READY_S&&fm.hours<=READY_H;};
+      const chips=(it,from)=>{const o=[];for(let lv=from;lv<=5;lv++)o.push([lv,advPc(val(it,lv),cur)]);return o;};
+      const st=k==='swords'?'dmg':'prot';let tier=-1;Ls.forEach((n,i)=>{const it=CATS[k].find(x=>x.n===n);if(it&&eq&&it[st]<=eq[st])tier=i;});
+      const base=Math.max(have,tier);let pick=-1;
+      for(let r=Math.min(Ls.length-1,base+2);r>base;r--){const it=CATS[k].find(x=>x.n===Ls[r]);if(it&&ready(it.n)&&val(it,5)>cur*1.02){pick=r;break;}}
+      if(pick>=0){const it=CATS[k].find(x=>x.n===Ls[pick]),fm=farm(it.n),src=dropsOf(it.n)[0],ch=chips(it,1);
+        rec.push({tag:'TARGET',title:`Next step: ${it.n}`,text:`${src?`Drops from ${src[0]} (${src[2]||'?'}%).`:'Bought from the Elf with 10 Epic Lv 5 items per try, up to 80%.'}${fm?` Expect about ${dnum(fm.kills)} kills (${plT(fm.hours*3600)}).`:''} Gain by item level, keeping your enchants:`,lv:ch,gain:ch[4][1],unit:gu,hours:fm?fm.hours:null});}
+      if(eq&&Ls.includes(eq.n)&&eqLv<5){const ch=chips(eq,eqLv+1);rec.push({tag:'LEVEL',title:`${eq.n}: level up to Lv 5`,text:`Each level needs one more item than the last (Lv ${eqLv+1} needs ${eqLv+1} items of Lv ${eqLv}). Gain by level:`,lv:ch,gain:ch[ch.length-1][1],unit:gu});}
+    };
+    ladder('swords');ladder('shields');
+    [...rec].forEach(r=>{if(r.tag==='LEVEL'){const nm=r.title.split(':')[0];for(let i=rec.length-1;i>=0;i--)if(rec[i].tag==='MERGE'&&!rec[i].ready&&rec[i].title.startsWith(nm+':'))rec.splice(i,1);}});
     // what moves the needle
     const nd=[],add=(l,v)=>nd.push([l,advPc(v,cur)]);
     add('Sword +1 level',E(sI,aS.level+1,f,adEn(aS,2),hI,hl,adEn(aH,2)));
@@ -915,20 +931,20 @@ function advAnalyze(inv,goal,bi,sortBy){
   const cnt=new Map();pets.forEach(p=>cnt.set(p.it.n,(cnt.get(p.it.n)||0)+1));const tier=TIER.find(x=>L<=x[0])[1];
   cnt.forEach((n,name)=>{const x=ADXP[name];if(!x||n<10)return;const fr=Math.min(100,tier/x[1]*(1+.05*F)),at=Math.floor(n/10);
     rec.push({tag:'ENHANCE',ready:1,title:`${n} x ${name}: ${at} attempt${at>1?'s':''} at the Pet Enhancer`,text:`Makes ${x[0]}. Free chance ${+fr.toFixed(2)}%, paid ${+Math.min(100,fr*3).toFixed(2)}%.`,gain:null});});
-  const ord={SWAP:0,MERGE:1,ENCHANT:2,PETS:3,ENHANCE:4,TARGET:5},sc2=r=>sortBy==='hour'?(r.hours?r.gain/Math.max(.05,r.hours):r.ready&&r.gain!=null?1e9+r.gain:-1):(r.gain==null?-1:r.gain);
+  const ord={SWAP:0,MERGE:1,LEVEL:1,ENCHANT:2,PETS:3,ENHANCE:4,TARGET:5},sc2=r=>sortBy==='hour'?(r.hours?r.gain/Math.max(.05,r.hours):r.ready&&r.gain!=null?1e9+r.gain:-1):(r.gain==null?-1:r.gain);
   rec.sort((a,b)=>(b.ready||0)-(a.ready||0)||sc2(b)-sc2(a)||ord[a.tag]-ord[b.tag]);
   return res;
 }
 function advHtml(inv,goal,bi,sortBy){
   const a=advAnalyze(inv,goal,bi,sortBy),best=a.pairs[0];
   const tiles=a.cur!=null&&best?minis([['CURRENT',gFmt(goal,a.cur)],['BEST OWNED SETUP',gFmt(goal,best.v)],['POSSIBLE GAIN',best.v>a.cur*1.0005?'+'+advPc(best.v,a.cur).toFixed(1)+'%':'Already best'],['IDEAS',a.rec.length]]):'';
-  const list=a.rec.map(r=>`<div class="rc" style="--c:${ADTAG[r.tag]}"><div><div class="tg">${r.tag}${r.ready?' · READY NOW':''}</div><div class="rt">${esc(r.title)}</div><p>${esc(r.text)}</p></div>${r.gain==null?'':`<div class="gv">${r.gain>=0?'+':''}${Math.abs(r.gain)<10?r.gain.toFixed(1):Math.round(r.gain)}%<small>${r.unit}</small></div>`}</div>`).join('');
+  const list=a.rec.map(r=>`<div class="rc" style="--c:${ADTAG[r.tag]}"><div><div class="tg">${r.tag}${r.ready?' · READY NOW':''}</div><div class="rt">${esc(r.title)}</div><p>${esc(r.text)}</p>${r.lv?`<div class="lvs">${r.lv.map(([l,g])=>`<span class="${g>=0.05?'up':'dn'}">Lv ${l} ${g>=0?'+':''}${Math.abs(g)<10?g.toFixed(1):Math.round(g)}%</span>`).join('')}</div>`:''}</div>${r.gain==null?'':`<div class="gv">${r.gain>=0?'+':''}${Math.abs(r.gain)<10?r.gain.toFixed(1):Math.round(r.gain)}%<small>${r.unit}</small></div>`}</div>`).join('');
   const nmax=Math.max(.0001,...a.needle.map(n=>Math.abs(n[1])));
   const nd=a.needle.length?`<h4>WHAT MOVES THE NEEDLE · ${esc(GOALS[goal].toUpperCase())}</h4>${a.needle.map(([l,g])=>`<div class="nd"><span>${l}</span><div><i style="width:${Math.max(0,Math.abs(g)/nmax*100)}%"></i></div><b>${g>0.005?'+'+(g<10?g.toFixed(1):Math.round(g))+'%':'—'}</b></div>`).join('')}`:'';
   const lab=(x,k)=>x.it?`${esc(x.it.n)} Lv ${x.o.level}${k==='s'&&adEn(x.o,0)?' · Flame '+ROM[adEn(x.o,0)]:''}`:'None';
   const pt=a.pairs.length?`<h4>BEST OWNED PAIRS FOR THIS GOAL</h4><div class="tbl" style="max-height:none"><table><tr><th>#</th><th>Sword</th><th>Shield</th><th>${gUnit[goal]}</th></tr>${a.pairs.map((p,i)=>`<tr><td>${i+1}</td><td>${lab(p.s,'s')}</td><td>${lab(p.h,'h')}</td><td>${gFmt(goal,p.v)}</td></tr>`).join('')}</table></div>`:'';
   const note=a.ok?'':'<p class="empty" style="margin-top:12px">Some of this player\'s gear is not recognised yet, so gear-based advice is limited.</p>';
-  return `<div class="card gold" style="margin-top:14px"><h3>Upgrade advisor</h3>${tiles}${note}${nd}${pt}${petTeams(inv)}<h4>RECOMMENDATIONS</h4><div class="recs">${list||'<p class="empty">Nothing to suggest right now.</p>'}</div></div>`;
+  return `<div class="card gold" style="margin-top:14px"><h3>Upgrade advisor</h3>${tiles}${note}${nd}${pt}${petTeams(inv)}<h4>RECOMMENDATIONS</h4><div class="recs">${list||'<p class="empty">Nothing to suggest right now.</p>'}</div>${a.done.length?`<h4>ALREADY MAXED</h4><div class="recs">${a.done.map(([t,x])=>`<div class="rc" style="--c:#3dffa0"><div><div class="tg">MAXED</div><div class="rt">${esc(t)}</div><p>${esc(x)}</p></div></div>`).join('')}</div>`:''}</div>`;
 }
 
 /* ---------- armor ids (1 = weakest, 24 = Eternal), checks ---------- */
@@ -939,7 +955,7 @@ const ARMID={};['Helmet','Chestplate','Pants','Boots'].forEach(sl=>{ARMID[sl]=AR
 const armorBy=(sl,id)=>ARMID[sl][id-1];
 function armorHtml(inv){
   const pcs=ARSLOT.map(([sl,k])=>[sl,inv[k],armorBy(sl,inv[k])]);
-  return `<div class="card" style="margin-top:14px"><h3>Armor</h3><div class="cg" style="margin-top:8px">${pcs.map(([sl,id,a])=>a?gcard(SLOTC[sl],a.n,sl.toUpperCase(),'',[gst('POWER',xz(a.pw)),gst('EXTRA HP',nz(a.hp)),gst('HEALTH',xz(a.hm)),gst('GOLD',xz(a.g))],''):gcard(SLOTC[sl],'Armor #'+id,sl.toUpperCase(),'',[],'')).join('')}</div></div>`;
+  return `<div class="card" style="margin-top:14px"><h3>Armor</h3><div class="cg" style="margin-top:8px">${pcs.map(([sl,id,a])=>a?gcard(SLOTC[sl],a.n,sl.toUpperCase(),'',[gst('POWER',xz(a.pw)),gst('EXTRA HP',nz(a.hp)),gst('HEALTH',xz(a.hm)),gst('GOLD',xz(a.g))],''):gcard(SLOTC[sl],id?'Armor #'+id:'None',sl.toUpperCase(),'',[],'')).join('')}</div></div>`;
 }
 let ADVINV=null,ADVNAME='';
 function paintAdvisor(){
