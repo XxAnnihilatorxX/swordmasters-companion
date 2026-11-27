@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SwordMasters Companion Hub</title>
+<title>L∞P · SwordMasters Companion</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='5' fill='%230B111E'/%3E%3Cg fill='none' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath stroke='%2300B4D8' d='M12 12C9.6 8.4 7 7.5 5.5 7.5C3.6 7.5 2.5 9.5 2.5 12S3.6 16.5 5.5 16.5C7 16.5 9.6 15.6 12 12'/%3E%3Cpath stroke='%23FFBE0B' d='M12 12C14.4 8.4 17 7.5 18.5 7.5C20.4 7.5 21.5 9.5 21.5 12S20.4 16.5 18.5 16.5C17 16.5 14.4 15.6 12 12'/%3E%3C/g%3E%3C/svg%3E">
 <link rel="icon" type="image/png" href="./smcicon.png">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
 <style>
@@ -141,12 +142,24 @@ details{margin-top:18px}summary{cursor:pointer;color:var(--mute)}
 @media(max-width:900px){.mxgrid{grid-template-columns:1fr}}
 @media(max-width:700px){.shell{padding-left:0;padding-top:64px}.side{inset:0 0 auto 0;width:100%;height:64px;padding:8px 12px}.side:hover{width:100%}.logo{display:none}.sidenav{flex-direction:row;margin:0}.sidenav button span{display:none}.sidenav button{justify-content:center;padding:0}.sidenav button i{margin:0}main{padding:16px}.search{flex-direction:column}.go{padding:14px}}
 @media(prefers-reduced-motion:reduce){.spin{animation-duration:2s}main>section{animation:none}.side{transition:none}}
+/* ===== L∞P brand ===== */
+.loop-h1{display:flex;align-items:center;gap:.02em;font-size:clamp(34px,6vw,54px);line-height:1;letter-spacing:.02em;margin:0}
+.loop-h1 .lp{color:var(--gold);text-shadow:0 0 18px rgba(255,190,11,.35)}
+.loop-inf{height:.8em;width:1.6em;overflow:visible;margin:0 .04em;filter:drop-shadow(0 0 10px rgba(0,180,216,.45));flex:none}
+.loop-inf .base{fill:none;stroke:url(#loopG);stroke-width:7;stroke-linecap:round;stroke-linejoin:round}
+.loop-inf .spark{fill:none;stroke:#fff;stroke-width:7;stroke-linecap:round;stroke-dasharray:.07 .93;opacity:.8;animation:loop-run 3.4s linear infinite}
+@keyframes loop-run{from{stroke-dashoffset:0}to{stroke-dashoffset:-1}}
+.loop-tag{margin-top:6px;font:600 11px Orbitron,sans-serif;letter-spacing:.28em;color:var(--mute)}
+.loop-tag b{color:var(--blue);font-weight:600}
+.logo svg.loop-ico{width:30px;height:15px;filter:drop-shadow(0 0 8px rgba(0,180,216,.5))}
+.loop-ico path{fill:none;stroke:url(#loopG2);stroke-width:8;stroke-linecap:round;stroke-linejoin:round}
+@media(prefers-reduced-motion:reduce){.loop-inf .spark{animation:none;opacity:0}}
 </style>
 </head>
 <body>
 <div class="shell">
 <aside class="side">
-  <div class="logo"><b>⚔</b><span>SWORDMASTERS</span></div>
+  <div class="logo"><svg class="loop-ico" viewBox="0 0 120 60" aria-hidden="true"><defs><linearGradient id="loopG2" gradientUnits="userSpaceOnUse" x1="5" y1="0" x2="115" y2="0"><stop offset="0" stop-color="#00B4D8"/><stop offset=".5" stop-color="#7ceeff"/><stop offset=".5" stop-color="#ffe08a"/><stop offset="1" stop-color="#FFBE0B"/></linearGradient></defs><path d="M60 30C48 12 34 8 24 8C12 8 5 18 5 30C5 42 12 52 24 52C34 52 48 48 60 30C72 12 86 8 96 8C108 8 115 18 115 30C115 42 108 52 96 52C86 52 72 48 60 30Z"/></svg><span>LOOP</span></div>
   <nav class="sidenav" role="tablist">
     <button role="tab" aria-selected="true" data-tab="analytics"><i>◈</i><span>Analytics</span></button>
     <button role="tab" aria-selected="false" data-tab="adv"><i>⚙</i><span>Gear Advisor</span></button>
@@ -154,7 +167,10 @@ details{margin-top:18px}summary{cursor:pointer;color:var(--mute)}
   </nav>
 </aside>
 <main>
-<div class="brand"><h1>SWORDMASTERS <span>COMPANION HUB</span></h1></div>
+<div class="brand">
+  <h1 class="loop-h1" aria-label="LOOP"><span class="lp">L</span><svg class="loop-inf" viewBox="0 0 120 60" aria-hidden="true"><defs><linearGradient id="loopG" gradientUnits="userSpaceOnUse" x1="5" y1="0" x2="115" y2="0"><stop offset="0" stop-color="#00B4D8"/><stop offset=".5" stop-color="#7ceeff"/><stop offset=".5" stop-color="#ffe08a"/><stop offset="1" stop-color="#FFBE0B"/></linearGradient></defs><path class="base" pathLength="1" d="M60 30C48 12 34 8 24 8C12 8 5 18 5 30C5 42 12 52 24 52C34 52 48 48 60 30C72 12 86 8 96 8C108 8 115 18 115 30C115 42 108 52 96 52C86 52 72 48 60 30Z"/><path class="spark" pathLength="1" d="M60 30C48 12 34 8 24 8C12 8 5 18 5 30C5 42 12 52 24 52C34 52 48 48 60 30C72 12 86 8 96 8C108 8 115 18 115 30C115 42 108 52 96 52C86 52 72 48 60 30Z"/></svg><span class="lp">P</span></h1>
+  <div class="loop-tag">SWORDMASTERS <b>COMPANION</b> · FARM. LOOP. LEVEL.</div>
+</div>
 
 <section id="analytics" style="margin-top:22px">
   <div class="subtabs"><button class="on" data-sub="search">Player Lookup</button><button data-sub="compare">Compare Players</button></div>
